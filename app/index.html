@@ -67,6 +67,10 @@
       gap: 22px;
     }
 
+    .slide.poll-slide.active {
+      gap: 14px;
+    }
+
     .slide::before {
       content: "";
       position: absolute;
@@ -171,6 +175,31 @@
       padding-left: 1.2em;
       display: grid;
       gap: 8px;
+    }
+
+    .poll-slide h1,
+    .poll-slide h2 {
+      font-size: clamp(34px, 4.2vw, 60px);
+    }
+
+    .poll-slide .panel {
+      min-height: 138px;
+      padding: 18px 20px;
+    }
+
+    .poll-slide .panel h3 {
+      font-size: 25px;
+    }
+
+    .poll-slide .panel p,
+    .poll-slide .panel li {
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .poll-slide .takeaway {
+      font-size: 20px;
+      padding-top: 10px;
     }
 
     .accent-teal { border-top: 8px solid var(--teal); }
@@ -604,7 +633,7 @@
 </head>
 <body>
   <main class="deck" aria-live="polite">
-    <section class="slide active">
+    <section class="slide poll-slide active">
       <header>
         <div>
           <div class="label">開場｜教師研習</div>
@@ -661,7 +690,7 @@
       <div class="takeaway">真正的自主，是能掌握自己的認知歷程。</div>
     </section>
 
-    <section class="slide">
+    <section class="slide poll-slide">
       <header>
         <div>
           <div class="label">問題診斷</div>
@@ -817,7 +846,7 @@
       <div class="takeaway">AI 應該支援認知歷程，不是替代認知歷程。</div>
     </section>
 
-    <section class="slide">
+    <section class="slide poll-slide">
       <header>
         <div>
           <div class="label">關鍵原則</div>
@@ -1016,9 +1045,83 @@
       setPollStatus(pollElement, message);
     }
 
+    function getPollMode() {
+      return new URLSearchParams(window.location.search).get("pollMode");
+    }
+
+    function getLocalPollUserId() {
+      const params = new URLSearchParams(window.location.search);
+      const explicitUser = params.get("pollUser");
+      if (explicitUser) return explicitUser;
+
+      const key = "soil-presentation-local-poll-user";
+      let userId = localStorage.getItem(key);
+      if (!userId) {
+        userId = `local-${crypto.randomUUID()}`;
+        localStorage.setItem(key, userId);
+      }
+      return userId;
+    }
+
+    function initLocalPolls() {
+      const pollElements = Array.from(document.querySelectorAll("[data-poll-id]"));
+      const userId = getLocalPollUserId();
+      const channel = "BroadcastChannel" in window ? new BroadcastChannel("soil-presentation-local-polls") : null;
+
+      function readVotes(pollId) {
+        try {
+          return JSON.parse(localStorage.getItem(`soil-poll-${pollId}`) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function writeVote(pollId, optionId) {
+        const votes = readVotes(pollId);
+        votes[userId] = optionId;
+        localStorage.setItem(`soil-poll-${pollId}`, JSON.stringify(votes));
+        if (channel) channel.postMessage({ pollId });
+        renderAll();
+      }
+
+      function renderLocalPoll(pollElement) {
+        const pollId = pollElement.dataset.pollId;
+        const votes = readVotes(pollId);
+        const totals = {};
+        Object.values(votes).forEach((optionId) => {
+          totals[optionId] = (totals[optionId] || 0) + 1;
+        });
+
+        renderPollShell(pollElement, votes[userId] || null, totals);
+        pollElement.querySelectorAll(".poll-option").forEach((button) => {
+          button.addEventListener("click", () => {
+            writeVote(pollId, button.dataset.optionId);
+            setPollStatus(pollElement, "本地測試：已更新你的投票。");
+          });
+        });
+        setPollStatus(pollElement, "本地測試模式：投票資料只存在這台瀏覽器，不會寫入 Firebase。");
+      }
+
+      function renderAll() {
+        pollElements.forEach((pollElement) => renderLocalPoll(pollElement));
+      }
+
+      window.addEventListener("storage", (event) => {
+        if (event.key && event.key.startsWith("soil-poll-")) renderAll();
+      });
+      if (channel) channel.addEventListener("message", renderAll);
+
+      renderAll();
+    }
+
     async function initFirebasePolls() {
       const pollElements = Array.from(document.querySelectorAll("[data-poll-id]"));
       pollElements.forEach((pollElement) => renderPollShell(pollElement));
+
+      if (getPollMode() === "local") {
+        initLocalPolls();
+        return;
+      }
 
       if (!hasFirebaseConfig(window.PRESENTATION_FIREBASE_CONFIG)) {
         pollElements.forEach((pollElement) => {

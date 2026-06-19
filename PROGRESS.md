@@ -119,3 +119,16 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 
 - Playwright 驗證通過：3 個投票區存在、未設定 Firebase 時 12 個投票按鈕停用、console 無錯誤。
 - 第 1、3、10 頁投票區均未超出 16:9 投影片邊界。
+
+## 2026-06-19 本地投票測試模式
+
+已完成：
+
+- 新增 `?pollMode=local` 本地測試模式。
+- 本地模式使用瀏覽器 `localStorage` 模擬投票、改票與結果長條，不寫入 Firebase。
+- 可用 `pollUser` query parameter 模擬不同參與者。
+
+限制：
+
+- 本地模式不驗證 Firestore 寫入、Anonymous Auth 或 Security Rules。
+- 真實 Firebase 測試仍需 Firebase project 與 Web config。

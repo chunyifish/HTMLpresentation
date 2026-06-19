@@ -9,6 +9,7 @@
 - [x] 使用 Playwright 檢查本地端預覽可載入與翻頁。
 - [x] 加入 Firebase 互動投票 UI 與 Firestore rules。
 - [x] 檢查投票區在 16:9 投影片內不溢出。
+- [x] 加入 `?pollMode=local` 本地投票測試模式。
 - [ ] 人工檢查本地端預覽版面。
 - [ ] 建立或提供 Firebase project。
 - [ ] 啟用 Anonymous Auth 與 Firestore。

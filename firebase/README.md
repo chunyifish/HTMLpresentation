@@ -23,3 +23,20 @@ sessions/default/polls/{pollId}/votes/{uid}
 ```
 
 The static app owns poll questions in code. The public client may read poll paths and may only write its own anonymous vote document with one of the option ids allowed in `firestore.rules`.
+
+## Local testing without Firebase
+
+Open the local preview with:
+
+```text
+http://127.0.0.1:8000/?pollMode=local
+```
+
+This stores votes in browser `localStorage` and is only for checking the interaction flow. It does not test Firestore writes or Security Rules.
+
+Use `pollUser` to simulate different participants in separate tabs:
+
+```text
+http://127.0.0.1:8000/?pollMode=local&pollUser=teacher-a
+http://127.0.0.1:8000/?pollMode=local&pollUser=teacher-b
+```
