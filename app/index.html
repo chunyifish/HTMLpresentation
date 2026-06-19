@@ -933,10 +933,12 @@
 
   <script>
     window.PRESENTATION_FIREBASE_CONFIG = {
-      apiKey: "",
-      authDomain: "",
-      projectId: "",
-      appId: ""
+      apiKey: "AIzaSyCLLaGvkl8OBv48auTyYwWZDw_BI5aB77M",
+      authDomain: "htmlpresentation-soil.firebaseapp.com",
+      projectId: "htmlpresentation-soil",
+      appId: "1:361095003369:web:4c33db37fb6a9a46b88478",
+      storageBucket: "htmlpresentation-soil.firebasestorage.app",
+      messagingSenderId: "361095003369"
     };
 
     const POLLS = {
@@ -1043,6 +1045,13 @@
         button.disabled = true;
       });
       setPollStatus(pollElement, message);
+    }
+
+    function formatFirebaseError(error) {
+      if (error && error.code === "auth/configuration-not-found") {
+        return "Firebase Authentication 尚未啟用。請到 Firebase Console > Authentication > Sign-in method 啟用 Anonymous。";
+      }
+      return `Firebase 初始化失敗：${error.message}`;
     }
 
     function getPollMode() {
@@ -1195,7 +1204,7 @@
 
     initFirebasePolls().catch((error) => {
       document.querySelectorAll("[data-poll-id]").forEach((pollElement) => {
-        disablePoll(pollElement, `Firebase 初始化失敗：${error.message}`);
+        disablePoll(pollElement, formatFirebaseError(error));
       });
     });
   </script>

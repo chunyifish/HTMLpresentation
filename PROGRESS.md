@@ -132,3 +132,20 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 
 - 本地模式不驗證 Firestore 寫入、Anonymous Auth 或 Security Rules。
 - 真實 Firebase 測試仍需 Firebase project 與 Web config。
+
+## 2026-06-19 Firebase 專案建立
+
+已完成：
+
+- 安裝暫存 Firebase CLI：`%TEMP%\\htmlpresentation-firebase-tools`。
+- 使用已登入帳號 `chunyi.lii@gmail.com` 建立 Firebase project：`htmlpresentation-soil`。
+- 建立 Firebase Web App：`HTMLpresentation Web`。
+- 將 Firebase Web config 填入 `app/index.html`。
+- 透過 Firebase CLI 啟用 Firestore API、建立 default Firestore database，並部署 `firebase/firestore.rules`。
+- 新增 `.firebaserc`，預設 project 指向 `htmlpresentation-soil`。
+
+目前阻礙：
+
+- Anonymous Auth 尚未啟用。本機測試回報 `auth/configuration-not-found`。
+- Firebase CLI 15.22.0 只提供 `auth:export` / `auth:import`，沒有啟用 Anonymous provider 的命令。
+- 需在 Firebase Console > Authentication > Sign-in method 啟用 Anonymous 後，再測真實投票寫入。

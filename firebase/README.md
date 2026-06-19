@@ -12,7 +12,7 @@ This project uses Firebase only for anonymous live polls in the static web prese
 
 ## Web config
 
-Add the Firebase Web App config to `window.PRESENTATION_FIREBASE_CONFIG` in `app/index.html`.
+The Firebase Web App config is stored in `window.PRESENTATION_FIREBASE_CONFIG` in `app/index.html`.
 
 Firebase API keys for Firebase services are not authorization secrets, but Firestore access must be protected with Security Rules.
 

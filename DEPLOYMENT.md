@@ -18,12 +18,17 @@
 
 ## Firebase 狀態
 
-- Firebase：已規劃互動投票，等待 Firebase project 設定
-- Project ID：待填入
-- Firestore：投票資料庫，rules 已新增於 `firebase/firestore.rules`
+- Firebase：已建立 project，等待 Anonymous Auth 啟用後做完整線上寫入驗證
+- Project ID：htmlpresentation-soil
+- Firestore：已建立 default database，location `nam5`，rules 已部署
 - Storage：不使用
-- Auth：使用 Anonymous Auth，待在 Firebase Console 啟用
+- Auth：使用 Anonymous Auth，Firebase CLI 無 provider 設定命令，需在 Firebase Console 啟用
 - Functions：不使用
+
+## Firebase Console
+
+- Project Console：https://console.firebase.google.com/project/htmlpresentation-soil/overview
+- Authentication 設定：https://console.firebase.google.com/project/htmlpresentation-soil/authentication/providers
 
 ## 環境變數
 
