@@ -18,7 +18,7 @@
 
 ## Firebase 狀態
 
-- Firebase：已建立 project，真實投票寫入已在本地驗證
+- Firebase：已建立 project，真實投票寫入已在本地與公開頁驗證
 - Project ID：htmlpresentation-soil
 - Firestore：已建立 default database，location `nam5`，rules 已部署
 - Storage：不使用
@@ -29,6 +29,13 @@
 
 - Project Console：https://console.firebase.google.com/project/htmlpresentation-soil/overview
 - Authentication 設定：https://console.firebase.google.com/project/htmlpresentation-soil/authentication/providers
+
+## Firebase 驗證
+
+- 本地真實 Firebase 投票：通過
+- GitHub Pages 真實 Firebase 投票：通過
+- 改票更新同一匿名使用者 vote：通過
+- 最近公開測試截圖：`outputs/presentation-preview-public-firebase-live.png`
 
 ## 環境變數
 

@@ -16,7 +16,7 @@
 - [x] 建立 Firestore。
 - [x] 填入 Firebase Web config。
 - [x] 部署 Firestore rules。
-- [ ] 在公開頁測試真實投票寫入與即時結果。
+- [x] 在公開頁測試真實投票寫入與即時結果。
 
 ## 下次優先
 
