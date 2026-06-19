@@ -57,7 +57,13 @@
 
 ## Firebase 規則
 
-目前不使用 Firebase。除非使用者明確要求，不建立 Firebase project、不新增 Firebase 設定、不部署 Firebase。
+目前使用 Firebase 作為匿名即時投票與目前開放題目同步：
+
+- Firebase Authentication 僅使用 Anonymous Auth。
+- Firestore 僅保存投票、目前開放題目與必要時間戳。
+- 調整投票題目、選項或目前題目同步時，需同步更新 `app/index.html`、`app/vote.html` 與 `firebase/firestore.rules`。
+- 部署前需確認 Firestore Security Rules 已限制合法 poll id 與 option id。
+
 
 ## 完成回報格式
 

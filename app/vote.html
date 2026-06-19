@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>學員投票｜從 SOIL 教學心法重構 AI 時代的自主學習歷程</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #1f2a32;
+      --muted: #5d6974;
+      --paper: #f7f3ea;
+      --panel: #fffdf8;
+      --teal: #167277;
+      --line: #d9d2c5;
+      --green: #47765a;
+      --red: #b44d42;
+    }
+
+    * { box-sizing: border-box; }
+
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+
+    main {
+      width: min(720px, 100%);
+      min-height: 100vh;
+      margin: 0 auto;
+      padding: 22px 16px 28px;
+      display: grid;
+      align-content: start;
+      gap: 16px;
+    }
+
+    header {
+      display: grid;
+      gap: 6px;
+      padding: 4px 2px;
+    }
+
+    .label {
+      color: var(--teal);
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 8vw, 42px);
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .status {
+      min-height: 24px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .card {
+      display: grid;
+      gap: 16px;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-left: 10px solid var(--teal);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 16px 36px rgba(31, 42, 50, .08);
+    }
+
+    .question {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .options {
+      display: grid;
+      gap: 10px;
+    }
+
+    .option {
+      width: 100%;
+      min-height: 58px;
+      padding: 12px 14px;
+      border: 1px solid #cbd4dc;
+      border-radius: 8px;
+      background: #eef3f6;
+      color: var(--ink);
+      text-align: left;
+      font-size: 19px;
+      line-height: 1.3;
+      font-weight: 900;
+    }
+
+    .option.selected {
+      border-color: var(--teal);
+      background: #d8ece8;
+      color: #0c4548;
+    }
+
+    .option:disabled {
+      cursor: not-allowed;
+      opacity: .65;
+    }
+
+    .results {
+      display: grid;
+      gap: 9px;
+    }
+
+    .result {
+      display: grid;
+      grid-template-columns: minmax(92px, 150px) 1fr auto;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .bar {
+      height: 12px;
+      border-radius: 999px;
+      background: #e3ded5;
+      overflow: hidden;
+    }
+
+    .fill {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--teal);
+      transition: width .2s ease;
+    }
+
+    .empty {
+      padding: 22px 18px;
+      border: 1px dashed #b9c3c6;
+      border-radius: 8px;
+      background: #fffdf8;
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.5;
+      font-weight: 800;
+    }
+
+    .error { color: var(--red); }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="label">SOIL 研習｜學員投票</div>
+      <h1>請等待講師開放題目</h1>
+      <div class="status" id="status">正在連線...</div>
+    </header>
+
+    <section class="card" id="pollCard" hidden>
+      <p class="question" id="question"></p>
+      <div class="options" id="options"></div>
+      <div class="results" id="results"></div>
+    </section>
+
+    <section class="empty" id="emptyState">
+      講師切到投票頁時，這裡會自動出現目前題目。
+    </section>
+  </main>
+
+  <script>
+    window.PRESENTATION_FIREBASE_CONFIG = {
+      apiKey: "AIzaSyCLLaGvkl8OBv48auTyYwWZDw_BI5aB77M",
+      authDomain: "htmlpresentation-soil.firebaseapp.com",
+      projectId: "htmlpresentation-soil",
+      appId: "1:361095003369:web:4c33db37fb6a9a46b88478",
+      storageBucket: "htmlpresentation-soil.firebasestorage.app",
+      messagingSenderId: "361095003369"
+    };
+
+    const POLLS = {
+      "autonomy-pattern": {
+        question: "你目前最常看到的自主學習型態是什麼？",
+        options: [
+          { id: "search", label: "自己查資料" },
+          { id: "report", label: "自己完成報告" },
+          { id: "ai-output", label: "自己用 AI 產出作品" },
+          { id: "soil", label: "自己運作 SOIL 歷程" }
+        ]
+      },
+      "ai-risk": {
+        question: "AI 對學生自主學習最大的風險是什麼？",
+        options: [
+          { id: "fast-output", label: "快速產出掩蓋理解" },
+          { id: "dependency", label: "過度依賴工具" },
+          { id: "surface", label: "表面理解" },
+          { id: "outsourcing", label: "認知歷程委外" }
+        ]
+      },
+      "nondelegable-work": {
+        question: "哪一種認知工作最不能委外？",
+        options: [
+          { id: "question", label: "決定真正問題" },
+          { id: "evidence", label: "判斷證據強弱" },
+          { id: "integration", label: "重建自己的理解" },
+          { id: "revision", label: "面對錯誤並修正" }
+        ]
+      }
+    };
+
+    const statusElement = document.getElementById("status");
+    const pollCard = document.getElementById("pollCard");
+    const emptyState = document.getElementById("emptyState");
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("options");
+    const resultsElement = document.getElementById("results");
+    let activePollId = null;
+    let selectedOptionId = null;
+    let latestTotals = {};
+    let unsubscribeVote = null;
+    let unsubscribeVotes = null;
+    let firebaseFirestoreApi = null;
+    let db = null;
+    let uid = null;
+
+    function setStatus(text, isError = false) {
+      statusElement.textContent = text;
+      statusElement.classList.toggle("error", isError);
+    }
+
+    function renderEmpty(message) {
+      activePollId = null;
+      selectedOptionId = null;
+      latestTotals = {};
+      pollCard.hidden = true;
+      emptyState.hidden = false;
+      emptyState.textContent = message;
+    }
+
+    function renderPoll() {
+      const poll = POLLS[activePollId];
+      if (!poll) {
+        renderEmpty("講師尚未開放投票。");
+        return;
+      }
+
+      const totalVotes = Object.values(latestTotals).reduce((sum, count) => sum + count, 0);
+      pollCard.hidden = false;
+      emptyState.hidden = true;
+      questionElement.textContent = poll.question;
+      optionsElement.innerHTML = poll.options.map((option) => `
+        <button
+          class="option${option.id === selectedOptionId ? " selected" : ""}"
+          type="button"
+          data-option-id="${option.id}">
+          ${option.label}
+        </button>
+      `).join("");
+      resultsElement.innerHTML = poll.options.map((option) => {
+        const count = latestTotals[option.id] || 0;
+        const percent = totalVotes ? Math.round((count / totalVotes) * 100) : 0;
+        return `
+          <div class="result">
+            <span>${option.label}</span>
+            <span class="bar"><span class="fill" style="width: ${percent}%"></span></span>
+            <span>${count} 票</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function clearVoteSubscriptions() {
+      if (unsubscribeVote) unsubscribeVote();
+      if (unsubscribeVotes) unsubscribeVotes();
+      unsubscribeVote = null;
+      unsubscribeVotes = null;
+    }
+
+    function subscribePoll(pollId) {
+      clearVoteSubscriptions();
+      activePollId = pollId;
+      selectedOptionId = null;
+      latestTotals = {};
+      renderPoll();
+
+      const pollRef = firebaseFirestoreApi.doc(db, "sessions", "default", "polls", pollId);
+      const voteRef = firebaseFirestoreApi.doc(pollRef, "votes", uid);
+
+      unsubscribeVote = firebaseFirestoreApi.onSnapshot(voteRef, (snapshot) => {
+        selectedOptionId = snapshot.exists() ? snapshot.data().optionId : null;
+        renderPoll();
+      });
+
+      unsubscribeVotes = firebaseFirestoreApi.onSnapshot(firebaseFirestoreApi.collection(pollRef, "votes"), (snapshot) => {
+        latestTotals = {};
+        snapshot.forEach((docSnapshot) => {
+          const optionId = docSnapshot.data().optionId;
+          latestTotals[optionId] = (latestTotals[optionId] || 0) + 1;
+        });
+        renderPoll();
+      }, (error) => {
+        setStatus(`投票結果讀取失敗：${error.message}`, true);
+      });
+    }
+
+    optionsElement.addEventListener("click", async (event) => {
+      const button = event.target.closest(".option");
+      if (!button || !activePollId) return;
+      if (getPollMode() === "local") return;
+
+      optionsElement.querySelectorAll(".option").forEach((option) => {
+        option.disabled = true;
+      });
+
+      try {
+        const pollRef = firebaseFirestoreApi.doc(db, "sessions", "default", "polls", activePollId);
+        const voteRef = firebaseFirestoreApi.doc(pollRef, "votes", uid);
+        await firebaseFirestoreApi.setDoc(voteRef, {
+          optionId: button.dataset.optionId,
+          updatedAt: firebaseFirestoreApi.serverTimestamp()
+        }, { merge: true });
+        setStatus("已送出，可重新選擇更新你的投票。");
+      } catch (error) {
+        setStatus(`投票送出失敗：${error.message}`, true);
+      } finally {
+        renderPoll();
+      }
+    });
+
+    function getPollMode() {
+      return new URLSearchParams(window.location.search).get("pollMode");
+    }
+
+    function initLocalMode() {
+      const channel = "BroadcastChannel" in window ? new BroadcastChannel("soil-presentation-local-polls") : null;
+
+      function readActivePollId() {
+        return localStorage.getItem("soil-active-poll-id") || null;
+      }
+
+      function readVotes(pollId) {
+        try {
+          return JSON.parse(localStorage.getItem(`soil-poll-${pollId}`) || "{}");
+        } catch {
+          return {};
+        }
+      }
+
+      function getLocalPollUserId() {
+        const params = new URLSearchParams(window.location.search);
+        const explicitUser = params.get("pollUser");
+        if (explicitUser) return explicitUser;
+
+        const key = "soil-presentation-local-poll-user";
+        let userId = localStorage.getItem(key);
+        if (!userId) {
+          userId = `local-${crypto.randomUUID()}`;
+          localStorage.setItem(key, userId);
+        }
+        return userId;
+      }
+
+      uid = getLocalPollUserId();
+
+      function renderLocal() {
+        const nextPollId = readActivePollId();
+        if (!nextPollId || !POLLS[nextPollId]) {
+          renderEmpty("講師尚未開放投票。");
+          setStatus("本地測試模式：等待講師切到投票頁。");
+          return;
+        }
+
+        activePollId = nextPollId;
+        const votes = readVotes(activePollId);
+        selectedOptionId = votes[uid] || null;
+        latestTotals = {};
+        Object.values(votes).forEach((optionId) => {
+          latestTotals[optionId] = (latestTotals[optionId] || 0) + 1;
+        });
+        renderPoll();
+        setStatus("本地測試模式：請選擇一個答案。");
+      }
+
+      optionsElement.addEventListener("click", (event) => {
+        const button = event.target.closest(".option");
+        if (!button || !activePollId) return;
+
+        const votes = readVotes(activePollId);
+        votes[uid] = button.dataset.optionId;
+        localStorage.setItem(`soil-poll-${activePollId}`, JSON.stringify(votes));
+        if (channel) channel.postMessage({ pollId: activePollId });
+        renderLocal();
+        setStatus("本地測試：已更新你的投票。");
+      });
+
+      window.addEventListener("storage", (event) => {
+        if (event.key === "soil-active-poll-id" || (event.key && event.key.startsWith("soil-poll-"))) renderLocal();
+      });
+      if (channel) channel.addEventListener("message", renderLocal);
+      renderLocal();
+    }
+
+    async function initFirebaseMode() {
+      if (!window.PRESENTATION_FIREBASE_CONFIG.apiKey) {
+        renderEmpty("尚未設定 Firebase，投票功能暫停。");
+        setStatus("Firebase 設定不存在。", true);
+        return;
+      }
+
+      const [
+        firebaseApp,
+        firebaseAuth,
+        firebaseFirestore
+      ] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js")
+      ]);
+
+      firebaseFirestoreApi = firebaseFirestore;
+      const app = firebaseApp.initializeApp(window.PRESENTATION_FIREBASE_CONFIG);
+      const auth = firebaseAuth.getAuth(app);
+      db = firebaseFirestore.getFirestore(app);
+      const credential = await firebaseAuth.signInAnonymously(auth);
+      uid = credential.user.uid;
+
+      const sessionRef = firebaseFirestore.doc(db, "sessions", "default");
+      firebaseFirestore.onSnapshot(sessionRef, (snapshot) => {
+        const pollId = snapshot.exists() ? snapshot.data().activePollId : null;
+        if (!pollId || !POLLS[pollId]) {
+          clearVoteSubscriptions();
+          renderEmpty("講師尚未開放投票。");
+          setStatus("已連線，等待講師切到投票頁。");
+          return;
+        }
+        if (pollId !== activePollId) subscribePoll(pollId);
+        setStatus("已連線，請選擇一個答案。");
+      }, (error) => {
+        renderEmpty("目前無法讀取開放題目。");
+        setStatus(`目前題目讀取失敗：${error.message}`, true);
+      });
+    }
+
+    if (getPollMode() === "local") {
+      initLocalMode();
+    } else {
+      initFirebaseMode().catch((error) => {
+        renderEmpty("Firebase 初始化失敗。");
+        setStatus(error.message, true);
+      });
+    }
+  </script>
+</body>
+</html>

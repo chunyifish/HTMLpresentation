@@ -35,6 +35,7 @@
 - 本地真實 Firebase 投票：通過
 - GitHub Pages 真實 Firebase 投票：通過
 - 改票更新同一匿名使用者 vote：通過
+- 學員投票頁與目前題目同步：本地 local mode 驗證通過，Firestore rules 已部署，待 GitHub Pages 前端更新後做公開頁真實 Firebase 驗證
 - 最近公開測試截圖：`outputs/presentation-preview-public-firebase-live.png`
 - 最近 Firestore rules 部署：2026-06-19，部署成功，rules 已 release 到 `cloud.firestore`
 - 最近公開頁連線檢查：2026-06-19，投票狀態為「已連線，請選擇一個答案。」

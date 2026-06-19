@@ -7,6 +7,7 @@ const playwrightCorePath = path.join(
   "playwright-core"
 );
 const { chromium } = require(playwrightCorePath);
+const baseUrl = process.env.PRESENTATION_BASE_URL || "http://127.0.0.1:8000";
 
 async function main() {
   const browser = await chromium.launch({
@@ -21,7 +22,7 @@ async function main() {
   });
   page.on("pageerror", (error) => consoleErrors.push(error.message));
 
-  await page.goto("http://127.0.0.1:8000/", { waitUntil: "domcontentloaded" });
+  await page.goto(`${baseUrl}/app/`, { waitUntil: "domcontentloaded" });
   await page.locator("[data-poll-id]").first().waitFor();
   await page.waitForFunction(() => {
     const status = document.querySelector("[data-poll-status]")?.textContent || "";
@@ -43,14 +44,17 @@ async function main() {
   const screenshotPath = path.resolve(__dirname, "..", "outputs", "presentation-preview.png");
   await page.screenshot({ path: screenshotPath, fullPage: false });
 
-  const localPage = await browser.newPage({ viewport: { width: 1366, height: 768 } });
+  const localContext = await browser.newContext({ viewport: { width: 1366, height: 768 } });
+  const localPage = await localContext.newPage();
   const localConsoleErrors = [];
   localPage.on("console", (message) => {
     if (message.type() === "error") localConsoleErrors.push(message.text());
   });
   localPage.on("pageerror", (error) => localConsoleErrors.push(error.message));
-  await localPage.goto("http://127.0.0.1:8000/?pollMode=local&pollUser=verify-a", { waitUntil: "domcontentloaded" });
+  await localPage.goto(`${baseUrl}/app/?pollMode=local&pollUser=verify-a`, { waitUntil: "domcontentloaded" });
   await localPage.locator("[data-poll-id]").first().waitFor();
+  await localPage.locator("[data-vote-qr]").first().waitFor();
+  const voteUrl = await localPage.locator("[data-vote-url]").first().innerText();
   const localButtonsBefore = await localPage.locator(".slide.active .poll-option:disabled").count();
   await localPage.locator(".slide.active .poll-option").first().click();
   const firstVoteText = await localPage.locator(".slide.active .poll-result").first().innerText();
@@ -59,6 +63,24 @@ async function main() {
   const localStatus = await localPage.locator(".slide.active [data-poll-status]").innerText();
   const localScreenshotPath = path.resolve(__dirname, "..", "outputs", "presentation-preview-local-poll.png");
   await localPage.screenshot({ path: localScreenshotPath, fullPage: false });
+
+  const votePage = await localContext.newPage();
+  await votePage.setViewportSize({ width: 390, height: 844 });
+  const voteConsoleErrors = [];
+  votePage.on("console", (message) => {
+    if (message.type() === "error") voteConsoleErrors.push(message.text());
+  });
+  votePage.on("pageerror", (error) => voteConsoleErrors.push(error.message));
+  await votePage.goto(`${baseUrl}/app/vote.html?pollMode=local&pollUser=verify-b`, { waitUntil: "domcontentloaded" });
+  await votePage.locator("#pollCard").waitFor({ state: "visible" });
+  const voteQuestion = await votePage.locator("#question").innerText();
+  await votePage.locator(".option").first().click();
+  const voteStatus = await votePage.locator("#status").innerText();
+  await localPage.locator("#next").click();
+  await votePage.locator("#emptyState").waitFor({ state: "visible" });
+  const voteWaitingText = await votePage.locator("#emptyState").innerText();
+  const voteScreenshotPath = path.resolve(__dirname, "..", "outputs", "student-vote-preview.png");
+  await votePage.screenshot({ path: voteScreenshotPath, fullPage: true });
   await browser.close();
 
   console.log(JSON.stringify({
@@ -77,8 +99,16 @@ async function main() {
       firstVoteText,
       changedVoteText,
       status: localStatus,
+      voteUrl,
       consoleErrors: localConsoleErrors,
       screenshotPath: localScreenshotPath
+    },
+    studentVotePage: {
+      question: voteQuestion,
+      status: voteStatus,
+      waitingText: voteWaitingText,
+      consoleErrors: voteConsoleErrors,
+      screenshotPath: voteScreenshotPath
     }
   }, null, 2));
 }

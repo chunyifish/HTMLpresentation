@@ -11,6 +11,20 @@ service cloud.firestore {
           && optionId in ['question', 'evidence', 'integration', 'revision']);
     }
 
+    function isValidActivePollId(pollId) {
+      return pollId == null
+        || pollId in ['autonomy-pattern', 'ai-risk', 'nondelegable-work'];
+    }
+
+    match /sessions/{sessionId} {
+      allow read: if true;
+      allow create, update: if request.auth != null
+        && sessionId == 'default'
+        && request.resource.data.keys().hasOnly(['activePollId', 'updatedAt'])
+        && isValidActivePollId(request.resource.data.activePollId);
+      allow delete: if false;
+    }
+
     match /sessions/{sessionId}/polls/{pollId} {
       allow read: if true;
       allow create, update, delete: if false;

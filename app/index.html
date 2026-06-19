@@ -68,7 +68,7 @@
     }
 
     .slide.poll-slide.active {
-      gap: 14px;
+      gap: 10px;
     }
 
     .slide::before {
@@ -183,23 +183,23 @@
     }
 
     .poll-slide .panel {
-      min-height: 138px;
-      padding: 18px 20px;
+      min-height: 120px;
+      padding: 14px 18px;
     }
 
     .poll-slide .panel h3 {
-      font-size: 25px;
+      font-size: 23px;
     }
 
     .poll-slide .panel p,
     .poll-slide .panel li {
-      font-size: 20px;
-      line-height: 1.35;
+      font-size: 18px;
+      line-height: 1.28;
     }
 
     .poll-slide .takeaway {
-      font-size: 20px;
-      padding-top: 10px;
+      font-size: 18px;
+      padding-top: 8px;
     }
 
     .accent-teal { border-top: 8px solid var(--teal); }
@@ -455,9 +455,9 @@
       border: 1px solid var(--line);
       border-left: 12px solid var(--teal);
       border-radius: 8px;
-      padding: 14px 16px;
+      padding: 10px 12px;
       display: grid;
-      gap: 8px;
+      gap: 6px;
     }
 
     .live-poll h3 {
@@ -469,20 +469,20 @@
     .poll-options {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
+      gap: 6px;
     }
 
     .poll-option {
       width: 100%;
-      min-height: 38px;
+      min-height: 34px;
       height: auto;
-      padding: 8px 10px;
+      padding: 6px 9px;
       border: 1px solid #cbd4dc;
       border-radius: 6px;
       background: #eef3f6;
       color: var(--ink);
       text-align: left;
-      font-size: 15px;
+      font-size: 14px;
       line-height: 1.25;
       font-weight: 800;
     }
@@ -505,20 +505,20 @@
     .poll-results {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px 14px;
+      gap: 4px 12px;
     }
 
     .poll-result {
       display: grid;
-      grid-template-columns: minmax(90px, 150px) 1fr auto;
+      grid-template-columns: minmax(86px, 140px) 1fr auto;
       align-items: center;
-      gap: 8px;
-      font-size: 14px;
+      gap: 7px;
+      font-size: 13px;
       color: var(--muted);
     }
 
     .poll-bar {
-      height: 10px;
+      height: 8px;
       border-radius: 999px;
       background: #e3ded5;
       overflow: hidden;
@@ -534,9 +534,43 @@
     }
 
     .poll-status {
-      font-size: 13px;
+      font-size: 12px;
       color: var(--muted);
-      min-height: 18px;
+      min-height: 14px;
+    }
+
+    .audience-entry {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      align-items: center;
+      gap: 10px;
+      padding: 6px;
+      border: 1px solid #d8d0c3;
+      border-radius: 8px;
+      background: #f6f1e8;
+    }
+
+    .audience-entry img {
+      width: 72px;
+      height: 72px;
+      border: 4px solid white;
+      border-radius: 6px;
+      background: white;
+    }
+
+    .audience-entry b {
+      display: block;
+      margin-bottom: 3px;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .audience-entry span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
     }
 
     .controls {
@@ -662,6 +696,13 @@
         </div>
         <div class="live-poll" data-poll-id="autonomy-pattern">
           <h3>現場投票：你目前最常看到的自主學習型態是什麼？</h3>
+          <div class="audience-entry">
+            <img alt="學員投票頁 QR Code" data-vote-qr>
+            <div>
+              <b>學員掃描後即可投票</b>
+              <span data-vote-url></span>
+            </div>
+          </div>
           <div class="poll-options" data-poll-options></div>
           <div class="poll-results" data-poll-results></div>
           <div class="poll-status" data-poll-status>正在準備投票...</div>
@@ -707,6 +748,13 @@
         </div>
         <div class="live-poll" data-poll-id="ai-risk">
           <h3>現場投票：AI 對學生自主學習最大的風險是什麼？</h3>
+          <div class="audience-entry">
+            <img alt="學員投票頁 QR Code" data-vote-qr>
+            <div>
+              <b>學員掃描後即可投票</b>
+              <span data-vote-url></span>
+            </div>
+          </div>
           <div class="poll-options" data-poll-options></div>
           <div class="poll-results" data-poll-results></div>
           <div class="poll-status" data-poll-status>正在準備投票...</div>
@@ -877,6 +925,13 @@
         </div>
         <div class="live-poll" data-poll-id="nondelegable-work">
           <h3>現場投票：哪一種認知工作最不能委外？</h3>
+          <div class="audience-entry">
+            <img alt="學員投票頁 QR Code" data-vote-qr>
+            <div>
+              <b>學員掃描後即可投票</b>
+              <span data-vote-url></span>
+            </div>
+          </div>
           <div class="poll-options" data-poll-options></div>
           <div class="poll-results" data-poll-results></div>
           <div class="poll-status" data-poll-status>正在準備投票...</div>
@@ -971,10 +1026,28 @@
       }
     };
 
+    const VOTE_PAGE_URL = new URL("vote.html", window.location.href).href;
     const slides = Array.from(document.querySelectorAll(".slide"));
     const counter = document.getElementById("counter");
     const progress = document.getElementById("progress");
     let current = 0;
+    let activePollWriter = null;
+
+    document.querySelectorAll("[data-vote-url]").forEach((element) => {
+      element.textContent = VOTE_PAGE_URL;
+    });
+    document.querySelectorAll("[data-vote-qr]").forEach((image) => {
+      image.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(VOTE_PAGE_URL)}`;
+    });
+
+    function getCurrentPollId() {
+      return slides[current]?.querySelector("[data-poll-id]")?.dataset.pollId || null;
+    }
+
+    function syncActivePollToSlide() {
+      if (!activePollWriter) return;
+      activePollWriter(getCurrentPollId());
+    }
 
     function showSlide(index) {
       current = Math.max(0, Math.min(slides.length - 1, index));
@@ -982,6 +1055,7 @@
       counter.textContent = `${current + 1} / ${slides.length}`;
       progress.style.width = `${((current + 1) / slides.length) * 100}%`;
       document.title = `${current + 1}/${slides.length} 從 SOIL 教學心法重構 AI 時代的自主學習歷程`;
+      syncActivePollToSlide();
     }
 
     document.getElementById("prev").addEventListener("click", () => showSlide(current - 1));
@@ -1076,6 +1150,11 @@
       const pollElements = Array.from(document.querySelectorAll("[data-poll-id]"));
       const userId = getLocalPollUserId();
       const channel = "BroadcastChannel" in window ? new BroadcastChannel("soil-presentation-local-polls") : null;
+      activePollWriter = (pollId) => {
+        localStorage.setItem("soil-active-poll-id", pollId || "");
+        if (channel) channel.postMessage({ activePollId: pollId || null });
+      };
+      syncActivePollToSlide();
 
       function readVotes(pollId) {
         try {
@@ -1154,6 +1233,20 @@
       const db = firebaseFirestore.getFirestore(app);
       const credential = await firebaseAuth.signInAnonymously(auth);
       const uid = credential.user.uid;
+      const sessionRef = firebaseFirestore.doc(db, "sessions", "default");
+      activePollWriter = async (pollId) => {
+        try {
+          await firebaseFirestore.setDoc(sessionRef, {
+            activePollId: pollId,
+            updatedAt: firebaseFirestore.serverTimestamp()
+          }, { merge: true });
+        } catch (error) {
+          document.querySelectorAll("[data-poll-status]").forEach((status) => {
+            status.textContent = `目前題目同步失敗：${error.message}`;
+          });
+        }
+      };
+      syncActivePollToSlide();
 
       pollElements.forEach((pollElement) => {
         const pollId = pollElement.dataset.pollId;

@@ -175,3 +175,27 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 
 - 若要調整投票題目或選項，需同步更新 `app/index.html` 的 `POLLS` 與 `firebase/firestore.rules` 的合法選項清單。
 - 調整後再次執行「收工並同步 GitHub，並部署 Firebase rules」。
+
+## 2026-06-19 學員投票頁與目前題目同步
+
+已完成：
+
+- 新增 `app/vote.html` 作為手機優先的學員投票頁。
+- 在三個投票投影片加入學員投票頁 QR Code 與網址。
+- 講師簡報切到投票頁時，會同步寫入 `sessions/default.activePollId`；離開投票頁時清空目前題目。
+- 學員投票頁會監聽 `activePollId`，只顯示講師目前開放的題目。
+- 更新 `firebase/firestore.rules`，允許匿名使用者讀取與更新 `sessions/default.activePollId`，並限制合法 poll id。
+- 新增 `scripts/static-server.cjs`，供本地驗證時啟動穩定的靜態服務。
+- 更新 `scripts/verify-presentation.cjs`，加入 QR Code、學員頁、local activePollId 同步與手機 viewport 驗證。
+
+驗證：
+
+- 使用 `PRESENTATION_BASE_URL=http://127.0.0.1:8765 node scripts/verify-presentation.cjs` 驗證通過。
+- 驗證內容包含：簡報可載入、投票按鈕可用、QR URL 存在、學員頁可顯示目前題目、學員可投票、講師離開投票頁後學員頁回到等待狀態、console 無錯誤。
+- 已檢查 `outputs/presentation-preview-local-poll.png`，QR Code 加入後投票區與 takeaway 無重疊。
+- 已檢查 `outputs/student-vote-preview.png`，學員頁等待狀態無殘留舊題目。
+
+待完成：
+
+- 將更新後的前端推送到 GitHub Pages。
+- 部署更新後的 Firestore rules。已完成，Firebase CLI 回報 rules 已 release 到 `cloud.firestore`。
