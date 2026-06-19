@@ -17,7 +17,7 @@
 - [x] 確認 GitHub Pages 的發布分支與目錄。
 - [x] 建立 GitHub repo 並 push。
 - [x] 啟用 GitHub Pages。
-- [ ] 檢查 GitHub Pages 公開網址。
+- [x] 檢查 GitHub Pages 公開網址。
 
 ## 待確認
 

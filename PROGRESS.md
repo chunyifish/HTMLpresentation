@@ -91,3 +91,10 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 目前狀態：
 
 等待 GitHub Pages 建置完成後，可開啟 Pages URL 檢查公開頁面。
+
+公開檢查：
+
+- Repo URL 已回應 200：https://github.com/chunyifish/HTMLpresentation
+- Pages root 已回應 200：https://chunyifish.github.io/HTMLpresentation/
+- Pages app 已回應 200：https://chunyifish.github.io/HTMLpresentation/app/
+- GitHub Pages API 查詢時狀態仍顯示 `building`，但公開頁面已可讀取。
