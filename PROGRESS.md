@@ -155,3 +155,23 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 - 修正後的按鈕事件代理已推送到 GitHub Pages。
 - 公開頁真實投票寫入測試已通過。
 - 公開頁測試結果：第一選項投票後可寫入；改投第二選項後，第一選項票數下降、第二選項票數上升；console 無錯誤。
+
+## 2026-06-19 收工同步
+
+已完成：
+
+- 重新部署 Firebase Firestore rules 到 `htmlpresentation-soil`。
+- Firebase CLI 回報 `firebase/firestore.rules` 編譯成功，且已 release 到 `cloud.firestore`。
+- 檢查 GitHub Pages 狀態為 `built`。
+- 檢查公開簡報頁投票狀態，Firebase 顯示「已連線，請選擇一個答案。」且 console 無錯誤。
+
+目前狀態：
+
+- GitHub Pages 前端已部署。
+- Firebase Firestore rules 已部署。
+- 真實 Firebase 投票功能可用。
+
+下一步建議：
+
+- 若要調整投票題目或選項，需同步更新 `app/index.html` 的 `POLLS` 與 `firebase/firestore.rules` 的合法選項清單。
+- 調整後再次執行「收工並同步 GitHub，並部署 Firebase rules」。
