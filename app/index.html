@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>從 SOIL 教學心法重構 AI 時代的自主學習歷程</title>
+  <link rel="icon" href="data:,">
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #53616f;
+      --paper: #f7f4ee;
+      --panel: #fffdf8;
+      --line: #d8d2c7;
+      --teal: #176b70;
+      --green: #4f7f52;
+      --amber: #b7742a;
+      --red: #b44d42;
+      --blue: #355c8c;
+      --shadow: 0 18px 45px rgba(23, 32, 42, .16);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: #222831;
+      color: var(--ink);
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+
+    body {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      overflow: hidden;
+    }
+
+    .deck {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      background:
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255,255,255,.035) 1px, transparent 1px),
+        #222831;
+      background-size: 36px 36px;
+    }
+
+    .slide {
+      display: none;
+      width: min(1280px, calc(100vw - 56px));
+      aspect-ratio: 16 / 9;
+      background: var(--paper);
+      border: 1px solid rgba(255,255,255,.2);
+      box-shadow: var(--shadow);
+      padding: 46px 54px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide.active {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 22px;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 10px;
+      background: linear-gradient(90deg, var(--teal), var(--amber), var(--red), var(--blue));
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 22px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .label {
+      color: var(--teal);
+      font-weight: 700;
+      font-size: 18px;
+      letter-spacing: 0;
+      margin-bottom: 12px;
+    }
+
+    h1, h2 {
+      margin: 0;
+      letter-spacing: 0;
+      line-height: 1.15;
+    }
+
+    h1 {
+      font-size: clamp(42px, 5vw, 76px);
+      max-width: 980px;
+    }
+
+    h2 {
+      font-size: clamp(34px, 3.7vw, 58px);
+      max-width: 980px;
+    }
+
+    .page-no {
+      min-width: 84px;
+      text-align: right;
+      color: var(--muted);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+      display: grid;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .takeaway {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      color: #24323f;
+      font-size: 24px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      min-height: 170px;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .panel p, .panel li {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .panel ul {
+      margin: 0;
+      padding-left: 1.2em;
+      display: grid;
+      gap: 8px;
+    }
+
+    .accent-teal { border-top: 8px solid var(--teal); }
+    .accent-amber { border-top: 8px solid var(--amber); }
+    .accent-red { border-top: 8px solid var(--red); }
+    .accent-blue { border-top: 8px solid var(--blue); }
+
+    .big-quote {
+      font-size: clamp(40px, 5.6vw, 82px);
+      line-height: 1.18;
+      font-weight: 900;
+      text-align: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .subline {
+      font-size: 26px;
+      line-height: 1.45;
+      color: var(--muted);
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .soil-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .soil-card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 190px;
+      display: grid;
+      align-content: space-between;
+      gap: 12px;
+    }
+
+    .soil-card strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .soil-card span {
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .risk-map {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .risk {
+      border-radius: 8px;
+      padding: 22px;
+      color: white;
+      min-height: 210px;
+      display: grid;
+      align-content: space-between;
+    }
+
+    .risk strong {
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    .risk span {
+      font-size: 20px;
+      line-height: 1.35;
+      opacity: .92;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      align-items: center;
+    }
+
+    .step {
+      position: relative;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 22px;
+      min-height: 160px;
+    }
+
+    .step:not(:last-child)::after {
+      content: ">";
+      position: absolute;
+      right: -18px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--amber);
+      font-size: 34px;
+      font-weight: 900;
+    }
+
+    .step b {
+      display: block;
+      font-size: 27px;
+      margin-bottom: 10px;
+    }
+
+    .step span {
+      display: block;
+      color: var(--muted);
+      font-size: 19px;
+      line-height: 1.35;
+    }
+
+    .funnel {
+      display: grid;
+      gap: 14px;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    .funnel div {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 24px;
+      font-size: 28px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .funnel div:nth-child(1) { width: 100%; border-left: 12px solid var(--blue); }
+    .funnel div:nth-child(2) { width: 82%; margin: 0 auto; border-left: 12px solid var(--teal); }
+    .funnel div:nth-child(3) { width: 64%; margin: 0 auto; border-left: 12px solid var(--amber); }
+    .funnel div:nth-child(4) { width: 46%; margin: 0 auto; border-left: 12px solid var(--red); }
+
+    .matrix {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .matrix .cell {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 145px;
+    }
+
+    .cell b {
+      display: block;
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .cell span {
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .cycle {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .cycle .node {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 8px;
+      padding: 24px 18px;
+      text-align: center;
+      min-height: 150px;
+      display: grid;
+      align-content: center;
+      gap: 8px;
+    }
+
+    .node b {
+      font-size: 30px;
+    }
+
+    .node span {
+      color: var(--muted);
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .redline {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .redline .panel:first-child {
+      border-left: 12px solid var(--green);
+    }
+
+    .redline .panel:last-child {
+      border-left: 12px solid var(--red);
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .check {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+      min-height: 170px;
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .check b {
+      font-size: 24px;
+      line-height: 1.2;
+    }
+
+    .check span {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.35;
+    }
+
+    .teacher-task {
+      background: #eef3ef;
+      border: 1px solid #c7d4ca;
+      border-left: 12px solid var(--green);
+      border-radius: 8px;
+      padding: 18px 22px;
+      font-size: 22px;
+      line-height: 1.4;
+      color: #26382c;
+    }
+
+    .controls {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(16, 20, 26, .88);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      padding: 8px;
+      color: white;
+      backdrop-filter: blur(8px);
+    }
+
+    button {
+      border: 0;
+      border-radius: 6px;
+      min-width: 42px;
+      height: 36px;
+      padding: 0 12px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      color: white;
+      background: #3c4652;
+    }
+
+    button:hover { background: #53616f; }
+
+    .counter {
+      min-width: 76px;
+      text-align: center;
+      font-size: 15px;
+      color: #e9edf1;
+    }
+
+    .progress {
+      position: fixed;
+      left: 0;
+      bottom: 0;
+      height: 5px;
+      background: var(--amber);
+      z-index: 11;
+      width: 8.33%;
+      transition: width .2s ease;
+    }
+
+    @media (max-width: 860px) {
+      body { overflow: auto; }
+      .deck { padding: 12px; align-items: start; }
+      .slide {
+        width: calc(100vw - 24px);
+        min-height: calc(100vh - 82px);
+        aspect-ratio: auto;
+        padding: 30px 22px 90px;
+      }
+      .slide.active { display: block; }
+      header { grid-template-columns: 1fr; }
+      .page-no { text-align: left; }
+      h1 { font-size: 38px; }
+      h2 { font-size: 32px; }
+      .content { display: block; }
+      .two-col, .soil-grid, .risk-map, .flow, .matrix, .cycle, .redline, .checklist {
+        grid-template-columns: 1fr;
+        margin-top: 20px;
+      }
+      .step:not(:last-child)::after { display: none; }
+      .takeaway { margin-top: 20px; font-size: 20px; }
+      .controls { bottom: 10px; }
+    }
+
+    @media print {
+      body { display: block; overflow: visible; background: white; }
+      .deck { display: block; padding: 0; background: white; }
+      .slide {
+        display: grid !important;
+        width: 100vw;
+        height: 100vh;
+        box-shadow: none;
+        border: 0;
+        break-after: page;
+      }
+      .controls, .progress { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="deck" aria-live="polite">
+    <section class="slide active">
+      <header>
+        <div>
+          <div class="label">開場｜教師研習</div>
+          <h1>AI 越強，自主學習越需要被重新定義</h1>
+        </div>
+        <div class="page-no">01 / 12</div>
+      </header>
+      <div class="content">
+        <div class="two-col">
+          <div class="panel accent-red">
+            <h3>常見誤解</h3>
+            <ul>
+              <li>學生自己查資料</li>
+              <li>學生自己做報告</li>
+              <li>學生自己用 AI 產出作品</li>
+            </ul>
+          </div>
+          <div class="panel accent-teal">
+            <h3>重新定義</h3>
+            <ul>
+              <li>學生能設定問題</li>
+              <li>學生能組織證據</li>
+              <li>學生能重建並驗證理解</li>
+            </ul>
+          </div>
+        </div>
+        <div class="teacher-task">研習任務：回想一份學生自主學習成果，它比較像「完成作品」還是「建構理解」？</div>
+      </div>
+      <div class="takeaway">自主學習不是少了教師，而是多了自我監控。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">核心命題</div>
+          <h2>自主學習不是自己查資料，而是自己運作 SOIL</h2>
+        </div>
+        <div class="page-no">02 / 12</div>
+      </header>
+      <div class="content">
+        <p class="big-quote">學生能自己運作 SOIL，才是真正的自主學習。</p>
+        <div class="soil-grid">
+          <div class="soil-card accent-blue"><strong>選取</strong><span>提出問題，保留自己的預測。</span></div>
+          <div class="soil-card accent-teal"><strong>組織</strong><span>把資料整理成可推理的證據。</span></div>
+          <div class="soil-card accent-amber"><strong>整合</strong><span>用自己的話重建理解。</span></div>
+          <div class="soil-card accent-red"><strong>遷移</strong><span>驗證、修正，換情境使用。</span></div>
+        </div>
+      </div>
+      <div class="takeaway">真正的自主，是能掌握自己的認知歷程。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">問題診斷</div>
+          <h2>AI 讓答案更容易，也讓理解更容易被跳過</h2>
+        </div>
+        <div class="page-no">03 / 12</div>
+      </header>
+      <div class="content">
+        <div class="risk-map">
+          <div class="risk" style="background:#355c8c"><strong>快速產出</strong><span>報告、大綱、摘要瞬間完成。</span></div>
+          <div class="risk" style="background:#b7742a"><strong>過度依賴</strong><span>學生把策略選擇交給工具。</span></div>
+          <div class="risk" style="background:#176b70"><strong>表面理解</strong><span>看似流暢，不代表能解釋。</span></div>
+          <div class="risk" style="background:#b44d42"><strong>認知委外</strong><span>答案完成了，思考未必發生。</span></div>
+        </div>
+        <div class="teacher-task">研習任務：把「用 AI 完成答案」和「用 AI 支援學習」分成兩欄，各列三個例子。</div>
+      </div>
+      <div class="takeaway">AI 的問題不是能不能用，而是誰在思考。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">認知本質</div>
+          <h2>學習不是輸入資料，而是重建心理模型</h2>
+        </div>
+        <div class="page-no">04 / 12</div>
+      </header>
+      <div class="content">
+        <div class="flow">
+          <div class="step"><b>資訊取得</b><span>學生找到很多資料。</span></div>
+          <div class="step"><b>知識連結</b><span>新知與先備知識產生關係。</span></div>
+          <div class="step"><b>結構化理解</b><span>概念之間形成可說明的模型。</span></div>
+          <div class="step"><b>可遷移</b><span>能解釋新問題，面對反例。</span></div>
+        </div>
+        <div class="teacher-task">研習任務：判斷學生作品中的內容是「資料堆疊」還是「模型重建」。</div>
+      </div>
+      <div class="takeaway">知道更多不等於理解更深。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">SOIL 1｜選取</div>
+          <h2>先形成問題，再開始搜尋</h2>
+        </div>
+        <div class="page-no">05 / 12</div>
+      </header>
+      <div class="content">
+        <div class="funnel">
+          <div>主題：AI 與自主學習</div>
+          <div>問題：AI 會促進還是削弱自主學習？</div>
+          <div>預測：取決於學生是否保留認知歷程</div>
+          <div>選取標準：能回答問題的證據</div>
+        </div>
+        <div class="teacher-task">研習任務：要求學生使用 AI 前，先寫下自己的問題與初步預測。</div>
+      </div>
+      <div class="takeaway">沒有問題，資料只會變成雜訊。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">SOIL 2｜組織</div>
+          <h2>從蒐集資料轉向組織證據</h2>
+        </div>
+        <div class="page-no">06 / 12</div>
+      </header>
+      <div class="content">
+        <div class="matrix">
+          <div class="cell" style="border-left:10px solid var(--green)"><b>支持</b><span>AI 能即時回饋、協助摘要、生成問題。</span></div>
+          <div class="cell" style="border-left:10px solid var(--red)"><b>反駁</b><span>AI 可能讓學生跳過閱讀、判斷與重建。</span></div>
+          <div class="cell" style="border-left:10px solid var(--blue)"><b>補充</b><span>效果取決於任務設計與學生使用方式。</span></div>
+          <div class="cell" style="border-left:10px solid var(--amber)"><b>待查證</b><span>學生是否能說明 AI 協助了哪一段歷程？</span></div>
+        </div>
+      </div>
+      <div class="takeaway">筆記不是越多越好，而是關係越清楚越好。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">SOIL 3｜整合</div>
+          <h2>理解發生在重建，而不是接收</h2>
+        </div>
+        <div class="page-no">07 / 12</div>
+      </header>
+      <div class="content">
+        <div class="flow">
+          <div class="step"><b>閱讀資料</b><span>取得外在內容。</span></div>
+          <div class="step"><b>提取重述</b><span>不用原文，用自己的話說。</span></div>
+          <div class="step"><b>生成表示</b><span>畫圖、舉例、教同儕。</span></div>
+          <div class="step"><b>檢查缺口</b><span>請 AI 或同儕指出不清楚之處。</span></div>
+        </div>
+        <div class="teacher-task">研習任務：把學生的資料摘要改成「三句核心理解」，每句都要能被追問。</div>
+      </div>
+      <div class="takeaway">能重建，才代表開始理解。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">SOIL 4｜學習／遷移</div>
+          <h2>用驗證與修正完成學習</h2>
+        </div>
+        <div class="page-no">08 / 12</div>
+      </header>
+      <div class="content">
+        <div class="cycle">
+          <div class="node" style="border-top:8px solid var(--blue)"><b>驗證</b><span>我的理解有證據嗎？</span></div>
+          <div class="node" style="border-top:8px solid var(--red)"><b>反例</b><span>什麼情況會挑戰它？</span></div>
+          <div class="node" style="border-top:8px solid var(--amber)"><b>修正</b><span>我的模型需要怎麼改？</span></div>
+          <div class="node" style="border-top:8px solid var(--green)"><b>遷移</b><span>能用到新情境嗎？</span></div>
+        </div>
+      </div>
+      <div class="takeaway">能換情境使用，理解才算站得住。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">AI 角色</div>
+          <h2>AI 可以強化 SOIL，也可能取代 SOIL</h2>
+        </div>
+        <div class="page-no">09 / 12</div>
+      </header>
+      <div class="content">
+        <div class="two-col">
+          <div class="panel accent-teal">
+            <h3>AI 作為協作夥伴</h3>
+            <ul>
+              <li>協助擴展問題</li>
+              <li>協助分類證據</li>
+              <li>協助檢查漏洞</li>
+              <li>協助設計反例</li>
+            </ul>
+          </div>
+          <div class="panel accent-red">
+            <h3>AI 作為答案機</h3>
+            <ul>
+              <li>直接替學生決定問題</li>
+              <li>直接替學生整理立場</li>
+              <li>直接替學生完成表述</li>
+              <li>直接替學生包裝成果</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="takeaway">AI 應該支援認知歷程，不是替代認知歷程。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">關鍵原則</div>
+          <h2>答案可以外包，理解不能委外</h2>
+        </div>
+        <div class="page-no">10 / 12</div>
+      </header>
+      <div class="content">
+        <div class="redline">
+          <div class="panel">
+            <h3>可以請 AI 協助</h3>
+            <ul>
+              <li>找資料方向</li>
+              <li>整理觀點差異</li>
+              <li>提出檢核問題</li>
+              <li>指出表述不清處</li>
+            </ul>
+          </div>
+          <div class="panel">
+            <h3>必須由學生完成</h3>
+            <ul>
+              <li>決定真正問題</li>
+              <li>判斷證據強弱</li>
+              <li>重建自己的理解</li>
+              <li>面對錯誤並修正</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="takeaway">真正不能交出去的，是判斷、整合與修正。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">教學應用</div>
+          <h2>評量作品之前，先看見學習歷程</h2>
+        </div>
+        <div class="page-no">11 / 12</div>
+      </header>
+      <div class="content">
+        <div class="checklist">
+          <div class="check"><b>我的問題</b><span>我到底想理解什麼？</span></div>
+          <div class="check"><b>我的預測</b><span>我一開始怎麼想？</span></div>
+          <div class="check"><b>我的證據</b><span>哪些資料支持或反駁？</span></div>
+          <div class="check"><b>我的修正</b><span>我改變了什麼想法？</span></div>
+          <div class="check"><b>我的遷移</b><span>我能用到哪個新情境？</span></div>
+        </div>
+        <div class="teacher-task">研習任務：將這五格改寫成你課程中的自主學習檢核表。</div>
+      </div>
+      <div class="takeaway">看見歷程，才看得見學習。</div>
+    </section>
+
+    <section class="slide">
+      <header>
+        <div>
+          <div class="label">結論</div>
+          <h2>把答案找出來，不如把理解建起來</h2>
+        </div>
+        <div class="page-no">12 / 12</div>
+      </header>
+      <div class="content">
+        <p class="big-quote">不是讓 AI 代替自己思考，而是在 AI 的協助下，更清楚地成為自己學習的主人。</p>
+        <p class="subline">自主學習不是學生自己完成任務，而是學生能自己運作 SOIL。</p>
+        <div class="teacher-task">出口句：AI 時代的自主學習是＿＿＿＿＿＿＿＿＿＿。</div>
+      </div>
+      <div class="takeaway">AI 越強，學生越需要真正的自主學習。</div>
+    </section>
+  </main>
+
+  <div class="controls" aria-label="簡報控制">
+    <button id="prev" type="button" aria-label="上一頁">&lt;</button>
+    <div class="counter" id="counter">1 / 12</div>
+    <button id="next" type="button" aria-label="下一頁">&gt;</button>
+    <button id="print" type="button" aria-label="列印">PDF</button>
+  </div>
+  <div class="progress" id="progress"></div>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    const counter = document.getElementById("counter");
+    const progress = document.getElementById("progress");
+    let current = 0;
+
+    function showSlide(index) {
+      current = Math.max(0, Math.min(slides.length - 1, index));
+      slides.forEach((slide, i) => slide.classList.toggle("active", i === current));
+      counter.textContent = `${current + 1} / ${slides.length}`;
+      progress.style.width = `${((current + 1) / slides.length) * 100}%`;
+      document.title = `${current + 1}/${slides.length} 從 SOIL 教學心法重構 AI 時代的自主學習歷程`;
+    }
+
+    document.getElementById("prev").addEventListener("click", () => showSlide(current - 1));
+    document.getElementById("next").addEventListener("click", () => showSlide(current + 1));
+    document.getElementById("print").addEventListener("click", () => window.print());
+
+    window.addEventListener("keydown", (event) => {
+      if (["ArrowRight", "PageDown", " "].includes(event.key)) {
+        event.preventDefault();
+        showSlide(current + 1);
+      }
+      if (["ArrowLeft", "PageUp"].includes(event.key)) {
+        event.preventDefault();
+        showSlide(current - 1);
+      }
+      if (event.key === "Home") showSlide(0);
+      if (event.key === "End") showSlide(slides.length - 1);
+    });
+
+    showSlide(0);
+  </script>
+</body>
+</html>
