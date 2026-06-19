@@ -18,11 +18,11 @@
 
 ## Firebase 狀態
 
-- Firebase：已建立 project，等待 Anonymous Auth 啟用後做完整線上寫入驗證
+- Firebase：已建立 project，真實投票寫入已在本地驗證
 - Project ID：htmlpresentation-soil
 - Firestore：已建立 default database，location `nam5`，rules 已部署
 - Storage：不使用
-- Auth：使用 Anonymous Auth，Firebase CLI 無 provider 設定命令，需在 Firebase Console 啟用
+- Auth：Anonymous Auth 已啟用
 - Functions：不使用
 
 ## Firebase Console

@@ -1165,10 +1165,25 @@
 
         setPollStatus(pollElement, "已連線，請選擇一個答案。");
 
+        pollElement.addEventListener("click", async (event) => {
+          const button = event.target.closest(".poll-option");
+          if (!button || !pollElement.contains(button)) return;
+
+          const optionId = button.dataset.optionId;
+          try {
+            await firebaseFirestore.setDoc(voteRef, {
+              optionId,
+              updatedAt: firebaseFirestore.serverTimestamp()
+            }, { merge: true });
+            setPollStatus(pollElement, "已送出，可重新選擇更新你的投票。");
+          } catch (error) {
+            setPollStatus(pollElement, `投票送出失敗：${error.message}`);
+          }
+        });
+
         firebaseFirestore.onSnapshot(voteRef, (snapshot) => {
           selectedOptionId = snapshot.exists() ? snapshot.data().optionId : null;
           renderPollShell(pollElement, selectedOptionId, latestTotals);
-          attachVoteHandlers();
         });
 
         firebaseFirestore.onSnapshot(firebaseFirestore.collection(pollRef, "votes"), (snapshot) => {
@@ -1178,27 +1193,9 @@
             latestTotals[optionId] = (latestTotals[optionId] || 0) + 1;
           });
           renderPollShell(pollElement, selectedOptionId, latestTotals);
-          attachVoteHandlers();
         }, (error) => {
           disablePoll(pollElement, `投票讀取失敗：${error.message}`);
         });
-
-        function attachVoteHandlers() {
-          pollElement.querySelectorAll(".poll-option").forEach((button) => {
-            button.addEventListener("click", async () => {
-              const optionId = button.dataset.optionId;
-              try {
-                await firebaseFirestore.setDoc(voteRef, {
-                  optionId,
-                  updatedAt: firebaseFirestore.serverTimestamp()
-                }, { merge: true });
-                setPollStatus(pollElement, "已送出，可重新選擇更新你的投票。");
-              } catch (error) {
-                setPollStatus(pollElement, `投票送出失敗：${error.message}`);
-              }
-            });
-          });
-        }
       });
     }
 

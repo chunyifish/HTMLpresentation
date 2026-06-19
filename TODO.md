@@ -12,7 +12,7 @@
 - [x] 加入 `?pollMode=local` 本地投票測試模式。
 - [ ] 人工檢查本地端預覽版面。
 - [x] 建立或提供 Firebase project。
-- [ ] 啟用 Anonymous Auth。
+- [x] 啟用 Anonymous Auth。
 - [x] 建立 Firestore。
 - [x] 填入 Firebase Web config。
 - [x] 部署 Firestore rules。

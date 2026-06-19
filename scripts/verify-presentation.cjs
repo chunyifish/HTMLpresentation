@@ -21,7 +21,12 @@ async function main() {
   });
   page.on("pageerror", (error) => consoleErrors.push(error.message));
 
-  await page.goto("http://127.0.0.1:8000/", { waitUntil: "networkidle" });
+  await page.goto("http://127.0.0.1:8000/", { waitUntil: "domcontentloaded" });
+  await page.locator("[data-poll-id]").first().waitFor();
+  await page.waitForFunction(() => {
+    const status = document.querySelector("[data-poll-status]")?.textContent || "";
+    return !status.includes("正在準備投票");
+  }, null, { timeout: 15000 }).catch(() => {});
   const title1 = await page.locator(".slide.active h1, .slide.active h2").first().innerText();
   const counter1 = await page.locator("#counter").innerText();
 
@@ -44,7 +49,8 @@ async function main() {
     if (message.type() === "error") localConsoleErrors.push(message.text());
   });
   localPage.on("pageerror", (error) => localConsoleErrors.push(error.message));
-  await localPage.goto("http://127.0.0.1:8000/?pollMode=local&pollUser=verify-a", { waitUntil: "networkidle" });
+  await localPage.goto("http://127.0.0.1:8000/?pollMode=local&pollUser=verify-a", { waitUntil: "domcontentloaded" });
+  await localPage.locator("[data-poll-id]").first().waitFor();
   const localButtonsBefore = await localPage.locator(".slide.active .poll-option:disabled").count();
   await localPage.locator(".slide.active .poll-option").first().click();
   const firstVoteText = await localPage.locator(".slide.active .poll-result").first().innerText();

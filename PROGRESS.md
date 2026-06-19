@@ -144,8 +144,13 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 - 透過 Firebase CLI 啟用 Firestore API、建立 default Firestore database，並部署 `firebase/firestore.rules`。
 - 新增 `.firebaserc`，預設 project 指向 `htmlpresentation-soil`。
 
-目前阻礙：
+目前狀態：
 
-- Anonymous Auth 尚未啟用。本機測試回報 `auth/configuration-not-found`。
-- Firebase CLI 15.22.0 只提供 `auth:export` / `auth:import`，沒有啟用 Anonymous provider 的命令。
-- 需在 Firebase Console > Authentication > Sign-in method 啟用 Anonymous 後，再測真實投票寫入。
+- Anonymous Auth 已由使用者在 Firebase Console 啟用。
+- 本地真實 Firebase 測試通過：等待 `已連線` 後可投票，改票會更新同一匿名使用者的選擇。
+- 測試結果：第一選項投票後為 1 票；改投第二選項後第一選項回到 0 票，第二選項增加。
+
+待完成：
+
+- 將修正後的按鈕事件代理推送到 GitHub Pages。
+- 在公開頁做真實投票寫入測試。
