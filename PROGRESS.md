@@ -76,3 +76,18 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 目前狀態：
 
 準備初始化 Git repo、建立 GitHub repo 並推送。
+
+## 2026-06-19 GitHub 上傳與 Pages 啟用
+
+已完成：
+
+- 初始化 Git repo，主分支為 `main`。
+- 建立 root commit：`7f5d669 Initialize web presentation project`。
+- 建立公開 GitHub repo：https://github.com/chunyifish/HTMLpresentation
+- 推送 `main` 到 `origin/main`。
+- 啟用 GitHub Pages，發布來源為 `main` branch root `/`。
+- Pages URL：https://chunyifish.github.io/HTMLpresentation/
+
+目前狀態：
+
+等待 GitHub Pages 建置完成後，可開啟 Pages URL 檢查公開頁面。

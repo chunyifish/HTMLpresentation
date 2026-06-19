@@ -15,8 +15,9 @@
 - [x] 確認 GitHub repo 要設為 public 或 private。
 - [x] 確認是否要立即 push 到 GitHub。
 - [x] 確認 GitHub Pages 的發布分支與目錄。
-- [ ] 建立 GitHub repo 並 push。
-- [ ] 啟用 GitHub Pages。
+- [x] 建立 GitHub repo 並 push。
+- [x] 啟用 GitHub Pages。
+- [ ] 檢查 GitHub Pages 公開網址。
 
 ## 待確認
 
