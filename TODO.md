@@ -7,7 +7,14 @@
 - [x] 確認 `working/slide-plan.md` 的 12 頁結構。
 - [x] 在 `app/` 建立靜態網頁簡報初版。
 - [x] 使用 Playwright 檢查本地端預覽可載入與翻頁。
+- [x] 加入 Firebase 互動投票 UI 與 Firestore rules。
+- [x] 檢查投票區在 16:9 投影片內不溢出。
 - [ ] 人工檢查本地端預覽版面。
+- [ ] 建立或提供 Firebase project。
+- [ ] 啟用 Anonymous Auth 與 Firestore。
+- [ ] 填入 Firebase Web config。
+- [ ] 部署 Firestore rules。
+- [ ] 在公開頁測試真實投票寫入與即時結果。
 
 ## 下次優先
 

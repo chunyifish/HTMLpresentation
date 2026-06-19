@@ -29,6 +29,11 @@ async function main() {
   const title2 = await page.locator(".slide.active h1, .slide.active h2").first().innerText();
   const counter2 = await page.locator("#counter").innerText();
   const visibleSlides = await page.locator(".slide.active").count();
+  const pollCount = await page.locator("[data-poll-id]").count();
+  const disabledPollButtons = await page.locator(".poll-option:disabled").count();
+  const pollStatuses = await page.locator("[data-poll-status]").evaluateAll((nodes) =>
+    nodes.map((node) => node.textContent.trim())
+  );
 
   const screenshotPath = path.resolve(__dirname, "..", "outputs", "presentation-preview.png");
   await page.screenshot({ path: screenshotPath, fullPage: false });
@@ -40,6 +45,9 @@ async function main() {
     title2,
     counter2,
     visibleSlides,
+    pollCount,
+    disabledPollButtons,
+    pollStatuses,
     consoleErrors,
     screenshotPath
   }, null, 2));

@@ -98,3 +98,24 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 - Pages root 已回應 200：https://chunyifish.github.io/HTMLpresentation/
 - Pages app 已回應 200：https://chunyifish.github.io/HTMLpresentation/app/
 - GitHub Pages API 查詢時狀態仍顯示 `building`，但公開頁面已可讀取。
+
+## 2026-06-19 Firebase 互動投票第一版
+
+已完成：
+
+- 在第 1、3、10 頁加入現場投票 UI。
+- 投票功能保持靜態 HTML 架構，不加入 React/Vite/npm build。
+- 新增 Firebase Web config placeholder；未填設定時投票會停用並顯示提示，不影響簡報翻頁。
+- 新增 Firestore rules：公開讀取、匿名使用者只能寫自己的 vote document、禁止前端改題目。
+- 新增 `firebase/README.md` 說明 Firebase 服務與資料模型。
+
+尚未完成：
+
+- 尚未填入 Firebase project id 與 Web config。
+- 尚未在 Firebase Console 啟用 Anonymous Auth、建立 Firestore、部署 rules。
+- 尚未在公開 GitHub Pages 進行真實投票寫入測試。
+
+本地驗證：
+
+- Playwright 驗證通過：3 個投票區存在、未設定 Firebase 時 12 個投票按鈕停用、console 無錯誤。
+- 第 1、3、10 頁投票區均未超出 16:9 投影片邊界。

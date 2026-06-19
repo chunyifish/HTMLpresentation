@@ -421,6 +421,95 @@
       color: #26382c;
     }
 
+    .live-poll {
+      background: #fffdf8;
+      border: 1px solid var(--line);
+      border-left: 12px solid var(--teal);
+      border-radius: 8px;
+      padding: 14px 16px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .live-poll h3 {
+      margin: 0;
+      font-size: 21px;
+      line-height: 1.2;
+    }
+
+    .poll-options {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .poll-option {
+      width: 100%;
+      min-height: 38px;
+      height: auto;
+      padding: 8px 10px;
+      border: 1px solid #cbd4dc;
+      border-radius: 6px;
+      background: #eef3f6;
+      color: var(--ink);
+      text-align: left;
+      font-size: 15px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .poll-option:hover:not(:disabled) {
+      background: #dce9ed;
+    }
+
+    .poll-option.selected {
+      border-color: var(--teal);
+      background: #d8ece8;
+      color: #0c4548;
+    }
+
+    .poll-option:disabled {
+      cursor: not-allowed;
+      opacity: .7;
+    }
+
+    .poll-results {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px 14px;
+    }
+
+    .poll-result {
+      display: grid;
+      grid-template-columns: minmax(90px, 150px) 1fr auto;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .poll-bar {
+      height: 10px;
+      border-radius: 999px;
+      background: #e3ded5;
+      overflow: hidden;
+    }
+
+    .poll-fill {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--teal);
+      transition: width .2s ease;
+    }
+
+    .poll-status {
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 18px;
+    }
+
     .controls {
       position: fixed;
       left: 50%;
@@ -490,6 +579,9 @@
         grid-template-columns: 1fr;
         margin-top: 20px;
       }
+      .poll-options, .poll-result {
+        grid-template-columns: 1fr;
+      }
       .step:not(:last-child)::after { display: none; }
       .takeaway { margin-top: 20px; font-size: 20px; }
       .controls { bottom: 10px; }
@@ -539,7 +631,12 @@
             </ul>
           </div>
         </div>
-        <div class="teacher-task">研習任務：回想一份學生自主學習成果，它比較像「完成作品」還是「建構理解」？</div>
+        <div class="live-poll" data-poll-id="autonomy-pattern">
+          <h3>現場投票：你目前最常看到的自主學習型態是什麼？</h3>
+          <div class="poll-options" data-poll-options></div>
+          <div class="poll-results" data-poll-results></div>
+          <div class="poll-status" data-poll-status>正在準備投票...</div>
+        </div>
       </div>
       <div class="takeaway">自主學習不是少了教師，而是多了自我監控。</div>
     </section>
@@ -579,7 +676,12 @@
           <div class="risk" style="background:#176b70"><strong>表面理解</strong><span>看似流暢，不代表能解釋。</span></div>
           <div class="risk" style="background:#b44d42"><strong>認知委外</strong><span>答案完成了，思考未必發生。</span></div>
         </div>
-        <div class="teacher-task">研習任務：把「用 AI 完成答案」和「用 AI 支援學習」分成兩欄，各列三個例子。</div>
+        <div class="live-poll" data-poll-id="ai-risk">
+          <h3>現場投票：AI 對學生自主學習最大的風險是什麼？</h3>
+          <div class="poll-options" data-poll-options></div>
+          <div class="poll-results" data-poll-results></div>
+          <div class="poll-status" data-poll-status>正在準備投票...</div>
+        </div>
       </div>
       <div class="takeaway">AI 的問題不是能不能用，而是誰在思考。</div>
     </section>
@@ -744,6 +846,12 @@
             </ul>
           </div>
         </div>
+        <div class="live-poll" data-poll-id="nondelegable-work">
+          <h3>現場投票：哪一種認知工作最不能委外？</h3>
+          <div class="poll-options" data-poll-options></div>
+          <div class="poll-results" data-poll-results></div>
+          <div class="poll-status" data-poll-status>正在準備投票...</div>
+        </div>
       </div>
       <div class="takeaway">真正不能交出去的，是判斷、整合與修正。</div>
     </section>
@@ -795,6 +903,43 @@
   <div class="progress" id="progress"></div>
 
   <script>
+    window.PRESENTATION_FIREBASE_CONFIG = {
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      appId: ""
+    };
+
+    const POLLS = {
+      "autonomy-pattern": {
+        question: "你目前最常看到的自主學習型態是什麼？",
+        options: [
+          { id: "search", label: "自己查資料" },
+          { id: "report", label: "自己完成報告" },
+          { id: "ai-output", label: "自己用 AI 產出作品" },
+          { id: "soil", label: "自己運作 SOIL 歷程" }
+        ]
+      },
+      "ai-risk": {
+        question: "AI 對學生自主學習最大的風險是什麼？",
+        options: [
+          { id: "fast-output", label: "快速產出掩蓋理解" },
+          { id: "dependency", label: "過度依賴工具" },
+          { id: "surface", label: "表面理解" },
+          { id: "outsourcing", label: "認知歷程委外" }
+        ]
+      },
+      "nondelegable-work": {
+        question: "哪一種認知工作最不能委外？",
+        options: [
+          { id: "question", label: "決定真正問題" },
+          { id: "evidence", label: "判斷證據強弱" },
+          { id: "integration", label: "重建自己的理解" },
+          { id: "revision", label: "面對錯誤並修正" }
+        ]
+      }
+    };
+
     const slides = Array.from(document.querySelectorAll(".slide"));
     const counter = document.getElementById("counter");
     const progress = document.getElementById("progress");
@@ -826,6 +971,130 @@
     });
 
     showSlide(0);
+
+    function hasFirebaseConfig(config) {
+      return Boolean(config.apiKey && config.authDomain && config.projectId && config.appId);
+    }
+
+    function setPollStatus(pollElement, text) {
+      pollElement.querySelector("[data-poll-status]").textContent = text;
+    }
+
+    function renderPollShell(pollElement, selectedOptionId = null, totals = {}) {
+      const pollId = pollElement.dataset.pollId;
+      const poll = POLLS[pollId];
+      const optionsElement = pollElement.querySelector("[data-poll-options]");
+      const resultsElement = pollElement.querySelector("[data-poll-results]");
+      const totalVotes = Object.values(totals).reduce((sum, count) => sum + count, 0);
+
+      optionsElement.innerHTML = poll.options.map((option) => `
+        <button
+          class="poll-option${option.id === selectedOptionId ? " selected" : ""}"
+          type="button"
+          data-option-id="${option.id}">
+          ${option.label}
+        </button>
+      `).join("");
+
+      resultsElement.innerHTML = poll.options.map((option) => {
+        const count = totals[option.id] || 0;
+        const percent = totalVotes ? Math.round((count / totalVotes) * 100) : 0;
+        return `
+          <div class="poll-result">
+            <span>${option.label}</span>
+            <span class="poll-bar"><span class="poll-fill" style="width: ${percent}%"></span></span>
+            <span>${count} 票</span>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function disablePoll(pollElement, message) {
+      pollElement.querySelectorAll(".poll-option").forEach((button) => {
+        button.disabled = true;
+      });
+      setPollStatus(pollElement, message);
+    }
+
+    async function initFirebasePolls() {
+      const pollElements = Array.from(document.querySelectorAll("[data-poll-id]"));
+      pollElements.forEach((pollElement) => renderPollShell(pollElement));
+
+      if (!hasFirebaseConfig(window.PRESENTATION_FIREBASE_CONFIG)) {
+        pollElements.forEach((pollElement) => {
+          disablePoll(pollElement, "尚未設定 Firebase，投票功能暫停。請在 app/index.html 補上 Firebase Web config。");
+        });
+        return;
+      }
+
+      const [
+        firebaseApp,
+        firebaseAuth,
+        firebaseFirestore
+      ] = await Promise.all([
+        import("https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js"),
+        import("https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js"),
+        import("https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js")
+      ]);
+
+      const app = firebaseApp.initializeApp(window.PRESENTATION_FIREBASE_CONFIG);
+      const auth = firebaseAuth.getAuth(app);
+      const db = firebaseFirestore.getFirestore(app);
+      const credential = await firebaseAuth.signInAnonymously(auth);
+      const uid = credential.user.uid;
+
+      pollElements.forEach((pollElement) => {
+        const pollId = pollElement.dataset.pollId;
+        const poll = POLLS[pollId];
+        const pollRef = firebaseFirestore.doc(db, "sessions", "default", "polls", pollId);
+        const voteRef = firebaseFirestore.doc(pollRef, "votes", uid);
+        let selectedOptionId = null;
+        let latestTotals = {};
+
+        setPollStatus(pollElement, "已連線，請選擇一個答案。");
+
+        firebaseFirestore.onSnapshot(voteRef, (snapshot) => {
+          selectedOptionId = snapshot.exists() ? snapshot.data().optionId : null;
+          renderPollShell(pollElement, selectedOptionId, latestTotals);
+          attachVoteHandlers();
+        });
+
+        firebaseFirestore.onSnapshot(firebaseFirestore.collection(pollRef, "votes"), (snapshot) => {
+          latestTotals = {};
+          snapshot.forEach((docSnapshot) => {
+            const optionId = docSnapshot.data().optionId;
+            latestTotals[optionId] = (latestTotals[optionId] || 0) + 1;
+          });
+          renderPollShell(pollElement, selectedOptionId, latestTotals);
+          attachVoteHandlers();
+        }, (error) => {
+          disablePoll(pollElement, `投票讀取失敗：${error.message}`);
+        });
+
+        function attachVoteHandlers() {
+          pollElement.querySelectorAll(".poll-option").forEach((button) => {
+            button.addEventListener("click", async () => {
+              const optionId = button.dataset.optionId;
+              try {
+                await firebaseFirestore.setDoc(voteRef, {
+                  optionId,
+                  updatedAt: firebaseFirestore.serverTimestamp()
+                }, { merge: true });
+                setPollStatus(pollElement, "已送出，可重新選擇更新你的投票。");
+              } catch (error) {
+                setPollStatus(pollElement, `投票送出失敗：${error.message}`);
+              }
+            });
+          });
+        }
+      });
+    }
+
+    initFirebasePolls().catch((error) => {
+      document.querySelectorAll("[data-poll-id]").forEach((pollElement) => {
+        disablePoll(pollElement, `Firebase 初始化失敗：${error.message}`);
+      });
+    });
   </script>
 </body>
 </html>

@@ -18,16 +18,16 @@
 
 ## Firebase 狀態
 
-- Firebase：目前不使用
-- Project ID：不適用
-- Firestore：不使用
+- Firebase：已規劃互動投票，等待 Firebase project 設定
+- Project ID：待填入
+- Firestore：投票資料庫，rules 已新增於 `firebase/firestore.rules`
 - Storage：不使用
-- Auth：不使用
+- Auth：使用 Anonymous Auth，待在 Firebase Console 啟用
 - Functions：不使用
 
 ## 環境變數
 
-目前不需要環境變數。若後續加入外部 API 或部署服務設定，需先更新 `.env.example`，且不得提交 `.env`。
+目前不需要 `.env`。Firebase Web config 需填入 `app/index.html` 的 `window.PRESENTATION_FIREBASE_CONFIG`。Firebase API key 可放在前端識別專案，但 Firestore 權限必須由 Security Rules 控制。
 
 ## 下一步
 
