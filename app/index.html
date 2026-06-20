@@ -202,6 +202,24 @@
       padding-top: 8px;
     }
 
+    .poll-slide .risk-map {
+      gap: 10px;
+    }
+
+    .poll-slide .risk {
+      min-height: 120px;
+      padding: 14px 16px;
+    }
+
+    .poll-slide .risk strong {
+      font-size: 23px;
+    }
+
+    .poll-slide .risk span {
+      font-size: 17px;
+      line-height: 1.25;
+    }
+
     .accent-teal { border-top: 8px solid var(--teal); }
     .accent-amber { border-top: 8px solid var(--amber); }
     .accent-red { border-top: 8px solid var(--red); }
@@ -455,21 +473,25 @@
       border: 1px solid var(--line);
       border-left: 12px solid var(--teal);
       border-radius: 8px;
-      padding: 10px 12px;
+      padding: 14px 16px;
       display: grid;
-      gap: 6px;
+      grid-template-columns: minmax(0, 1fr) 176px;
+      grid-template-areas:
+        "title title"
+        "results audience"
+        "status audience";
+      gap: 8px 16px;
     }
 
     .live-poll h3 {
+      grid-area: title;
       margin: 0;
-      font-size: 21px;
+      font-size: 24px;
       line-height: 1.2;
     }
 
     .poll-options {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 6px;
+      display: none;
     }
 
     .poll-option {
@@ -503,22 +525,40 @@
     }
 
     .poll-results {
+      grid-area: results;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 4px 12px;
+      gap: 8px;
     }
 
     .poll-result {
       display: grid;
-      grid-template-columns: minmax(86px, 140px) 1fr auto;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      gap: 7px;
-      font-size: 13px;
-      color: var(--muted);
+      gap: 7px 10px;
+      padding: 4px 11px;
+      border: 1px solid #d8d0c3;
+      border-radius: 7px;
+      background: white;
+      color: var(--ink);
+    }
+
+    .poll-result > span:first-child {
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .poll-result > span:last-child {
+      font-size: 18px;
+      line-height: 1;
+      font-weight: 800;
+      color: var(--teal);
     }
 
     .poll-bar {
-      height: 8px;
+      grid-column: 1 / -1;
+      height: 10px;
       border-radius: 999px;
       background: #e3ded5;
       overflow: hidden;
@@ -534,25 +574,30 @@
     }
 
     .poll-status {
-      font-size: 12px;
+      grid-area: status;
+      align-self: end;
+      font-size: 15px;
+      line-height: 1.25;
       color: var(--muted);
-      min-height: 14px;
+      min-height: 19px;
     }
 
     .audience-entry {
+      grid-area: audience;
       display: grid;
-      grid-template-columns: 82px 1fr;
+      justify-items: center;
       align-items: center;
-      gap: 10px;
-      padding: 6px;
+      gap: 6px;
+      padding: 8px;
       border: 1px solid #d8d0c3;
       border-radius: 8px;
       background: #f6f1e8;
+      text-align: center;
     }
 
     .audience-entry img {
-      width: 72px;
-      height: 72px;
+      width: 112px;
+      height: 112px;
       border: 4px solid white;
       border-radius: 6px;
       background: white;
@@ -561,15 +606,15 @@
     .audience-entry b {
       display: block;
       margin-bottom: 3px;
-      font-size: 16px;
+      font-size: 17px;
       line-height: 1.25;
     }
 
     .audience-entry span {
-      display: block;
+      display: none;
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.35;
+      font-size: 12px;
+      line-height: 1.25;
       overflow-wrap: anywhere;
     }
 
@@ -1026,7 +1071,11 @@
       }
     };
 
-    const VOTE_PAGE_URL = new URL("vote.html", window.location.href).href;
+    const PUBLIC_VOTE_PAGE_URL = "https://chunyifish.github.io/HTMLpresentation/app/vote.html";
+    const VOTE_PAGE_URL = window.location.protocol === "file:"
+      ? PUBLIC_VOTE_PAGE_URL
+      : new URL("vote.html", window.location.href).href;
+    const VOTE_PAGE_LABEL = "投票頁：" + new URL(VOTE_PAGE_URL).hostname;
     const slides = Array.from(document.querySelectorAll(".slide"));
     const counter = document.getElementById("counter");
     const progress = document.getElementById("progress");
@@ -1034,7 +1083,8 @@
     let activePollWriter = null;
 
     document.querySelectorAll("[data-vote-url]").forEach((element) => {
-      element.textContent = VOTE_PAGE_URL;
+      element.textContent = VOTE_PAGE_LABEL;
+      element.title = VOTE_PAGE_URL;
     });
     document.querySelectorAll("[data-vote-qr]").forEach((image) => {
       image.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(VOTE_PAGE_URL)}`;
