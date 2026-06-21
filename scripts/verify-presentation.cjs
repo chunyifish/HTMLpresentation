@@ -109,6 +109,24 @@ async function main() {
       noOverlap: pollBounds.bottom <= takeawayBounds.top
     };
   });
+  await filePage.setViewportSize({ width: 1450, height: 825 });
+  const redesignedSlidesLayout = await filePage.evaluate(() => [4, 11].map((slideIndex) => {
+    const slides = Array.from(document.querySelectorAll(".slide"));
+    slides.forEach((slide, index) => slide.classList.toggle("active", index === slideIndex));
+    const slide = slides[slideIndex];
+    const slideBounds = slide.getBoundingClientRect();
+    const taskBounds = slide.querySelector(".teacher-task").getBoundingClientRect();
+    const takeawayBounds = slide.querySelector(".takeaway").getBoundingClientRect();
+    return {
+      slide: slideIndex + 1,
+      contentInside: taskBounds.bottom <= slideBounds.bottom,
+      noOverlap: taskBounds.bottom <= takeawayBounds.top,
+      gap: Math.round((takeawayBounds.top - taskBounds.bottom) * 10) / 10
+    };
+  }));
+  if (redesignedSlidesLayout.some((result) => !result.contentInside || !result.noOverlap)) {
+    throw new Error(`Redesigned slide layout overflow: ${JSON.stringify(redesignedSlidesLayout)}`);
+  }
   await browser.close();
 
   console.log(JSON.stringify({
@@ -138,7 +156,8 @@ async function main() {
       consoleErrors: voteConsoleErrors,
       screenshotPath: voteScreenshotPath
     },
-    fileModeLayout
+    fileModeLayout,
+    redesignedSlidesLayout
   }, null, 2));
 }
 

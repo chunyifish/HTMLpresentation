@@ -360,6 +360,114 @@
     .funnel div:nth-child(3) { width: 64%; margin: 0 auto; border-left: 12px solid var(--amber); }
     .funnel div:nth-child(4) { width: 46%; margin: 0 auto; border-left: 12px solid var(--red); }
 
+    .selection-flow {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .selection-step {
+      position: relative;
+      min-height: 180px;
+      padding: 22px 18px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      display: grid;
+      align-content: center;
+      gap: 10px;
+    }
+
+    .selection-step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      z-index: 2;
+      right: -18px;
+      top: 50%;
+      transform: translate(50%, -50%);
+      color: var(--amber);
+      font-size: 30px;
+      font-weight: 900;
+    }
+
+    .selection-step .step-number {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: .08em;
+      color: var(--muted);
+    }
+
+    .selection-step b {
+      font-size: 28px;
+      line-height: 1.15;
+    }
+
+    .selection-step p {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.35;
+      color: var(--muted);
+    }
+
+    .selection-step:nth-child(1) { border-top: 8px solid var(--blue); }
+    .selection-step:nth-child(2) { border-top: 8px solid var(--teal); }
+    .selection-step:nth-child(3) { border-top: 8px solid var(--amber); }
+    .selection-step:nth-child(4) { border-top: 8px solid var(--red); }
+
+    .closing-slide .content {
+      gap: 16px;
+    }
+
+    .closing-contrast {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: stretch;
+      gap: 18px;
+    }
+
+    .closing-side {
+      min-height: 175px;
+      padding: 24px 28px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+      display: grid;
+      align-content: center;
+      gap: 12px;
+    }
+
+    .closing-side span {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .08em;
+    }
+
+    .closing-side b {
+      font-size: 34px;
+      line-height: 1.25;
+    }
+
+    .closing-no { border-left: 12px solid var(--red); }
+    .closing-no span { color: var(--red); }
+    .closing-yes { border-left: 12px solid var(--green); }
+    .closing-yes span { color: var(--green); }
+
+    .closing-arrow {
+      align-self: center;
+      color: var(--amber);
+      font-size: 48px;
+      font-weight: 900;
+    }
+
+    .closing-master {
+      margin: 0;
+      text-align: center;
+      font-size: 38px;
+      line-height: 1.2;
+      font-weight: 900;
+      color: #173f42;
+    }
+
     .matrix {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -828,7 +936,7 @@
       <div class="takeaway">知道更多不等於理解更深。</div>
     </section>
 
-    <section class="slide">
+    <section class="slide selection-slide">
       <header>
         <div>
           <div class="label">SOIL 1｜選取</div>
@@ -837,11 +945,11 @@
         <div class="page-no">05 / 12</div>
       </header>
       <div class="content">
-        <div class="funnel">
-          <div>主題：AI 與自主學習</div>
-          <div>問題：AI 會促進還是削弱自主學習？</div>
-          <div>預測：取決於學生是否保留認知歷程</div>
-          <div>選取標準：能回答問題的證據</div>
+        <div class="selection-flow">
+          <div class="selection-step"><span class="step-number">01</span><b>主題</b><p>AI 與自主學習</p></div>
+          <div class="selection-step"><span class="step-number">02</span><b>問題</b><p>AI 會促進還是削弱自主學習？</p></div>
+          <div class="selection-step"><span class="step-number">03</span><b>預測</b><p>取決於學生是否保留認知歷程</p></div>
+          <div class="selection-step"><span class="step-number">04</span><b>選取標準</b><p>能回答問題的證據</p></div>
         </div>
         <div class="teacher-task">研習任務：要求學生使用 AI 前，先寫下自己的問題與初步預測。</div>
       </div>
@@ -1006,7 +1114,7 @@
       <div class="takeaway">看見歷程，才看得見學習。</div>
     </section>
 
-    <section class="slide">
+    <section class="slide closing-slide">
       <header>
         <div>
           <div class="label">結論</div>
@@ -1015,7 +1123,12 @@
         <div class="page-no">12 / 12</div>
       </header>
       <div class="content">
-        <p class="big-quote">不是讓 AI 代替自己思考，而是在 AI 的協助下，更清楚地成為自己學習的主人。</p>
+        <div class="closing-contrast">
+          <div class="closing-side closing-no"><span>不是</span><b>讓 AI 代替<br>自己思考</b></div>
+          <div class="closing-arrow">→</div>
+          <div class="closing-side closing-yes"><span>而是</span><b>在 AI 協助下<br>重建、驗證與修正</b></div>
+        </div>
+        <p class="closing-master">更清楚地成為自己學習的主人</p>
         <p class="subline">自主學習不是學生自己完成任務，而是學生能自己運作 SOIL。</p>
         <div class="teacher-task">出口句：AI 時代的自主學習是＿＿＿＿＿＿＿＿＿＿。</div>
       </div>
