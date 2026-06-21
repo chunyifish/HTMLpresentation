@@ -199,3 +199,45 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 
 - 將更新後的前端推送到 GitHub Pages。
 - 部署更新後的 Firestore rules。已完成，Firebase CLI 回報 rules 已 release 到 `cloud.firestore`。
+
+## 2026-06-20 投票版面優化、部署與資料清理
+
+已完成：
+
+- 將講師頁投票區改為 2×2 大字結果卡，放大 QR Code，隱藏講師頁投票按鈕與重複網址。
+- 修正直接以 `file://` 開啟簡報時，本機中文長路徑撐高 QR 區的問題；QR 會改指向公開學員投票頁。
+- 更新 `scripts/verify-presentation.cjs`，由手機投票頁送票並驗證講師頁結果同步，另加入直接開檔不重疊檢查。
+- 依 1438×811 畫面量測，第 1、3、10 頁投票區與 takeaway 的間距均超過 13px。
+- 建立提交 `d064de5 Improve live poll layout`，推送到 `main`；GitHub Pages 建置狀態為 `built`。
+- 重新部署 Firestore rules；Firebase 回報規則已是最新版並 release 到 `cloud.firestore`。
+- 清除 `sessions/default`、三個投票題目的全部 votes 與目前開放題目；Firestore REST 原始回應均為空集合 `{}`。
+
+目前狀態：
+
+- GitHub Pages 已發布新版投票版面。
+- Firebase 投票資料為空；再次開啟講師投票頁時會自動重建 session，票數從 0 開始。
+- 本機仍有未追蹤除錯截圖 `outputs/presentation-preview-public-sync-debug.png`，未提交。
+
+下一步建議：
+
+- 正式研習前，用講師裝置與一支手機做一次現場網路及 QR Code 冒煙測試；若要保留零票狀態，測試後再次清空投票資料。
+
+## 2026-06-21 第 5、12 頁版面重構與部署
+
+已完成：
+
+- 第 5 頁由垂直漏斗改為「主題 → 問題 → 預測 → 選取標準」橫向四階段流程。
+- 第 12 頁由大型段落改為「不是 AI 代替思考／而是 AI 協助重建、驗證與修正」雙欄對比。
+- 使用 1450×825 viewport 實際翻頁驗證：第 5 頁任務與 takeaway 間距 64.2px，第 12 頁 30.4px；無溢出、重疊或瀏覽器錯誤。
+- 使用者查看本機新版簡報後確認畫面正常。
+- 建立提交 `7b9dca6 Refine selection and closing slides` 並推送到 `main`；GitHub Pages 狀態為 `built`。
+- 公開頁回應 200，已確認包含四階段流程與雙欄結論結構。
+- Firestore rules 編譯成功，Firebase 回報已是最新版並重新 release 到 `cloud.firestore`。
+
+限制：
+
+- 完整 `verify-presentation.cjs` 本次執行因外部 Firebase 等待而中止；兩頁專項翻頁與邊界驗證已通過，投票程式未修改。
+
+下一步建議：
+
+- 決定是否提交四份交接文件，並處理未追蹤的 `outputs/presentation-preview-public-sync-debug.png`。
