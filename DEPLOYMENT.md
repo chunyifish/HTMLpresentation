@@ -15,7 +15,7 @@
 - 發布來源：main branch
 - 發布目錄：root `/`
 - Pages URL：https://chunyifish.github.io/HTMLpresentation/
-- 最近部署 commit：`7b9dca6 Refine selection and closing slides`
+- 最近部署 commit：`b3c70f3 fix: resolve Firestore Missing or insufficient permissions error when resetBtn is clicked`
 - 最近部署日期：2026-06-21
 
 ## Firebase 狀態
@@ -39,11 +39,12 @@
 - 改票更新同一匿名使用者 vote：通過
 - 學員投票頁與目前題目同步：本地與公開頁驗證通過，使用者確認測試正常；Firestore rules 已部署，測試資料已清空
 - 最近公開測試截圖：`outputs/presentation-preview-public-firebase-live.png`
-- 最近 Firestore rules 部署：2026-06-21，規則已是最新版並 release 到 `cloud.firestore`
-- 最近公開頁連線檢查：2026-06-19，投票狀態為「已連線，請選擇一個答案。」
-- 最近公開頁部署檢查：2026-06-20，簡報與學員投票頁均回應 200，公開 HTML 已包含新版投票版面。
+- 最近 Firestore rules 部署：2026-06-21，更新並放寬對 `polls/{pollId}` 寫入限制以支援邏輯重設，規則已 release 到 `cloud.firestore`
+- 最近公開頁連線檢查：2026-06-21，投票狀態為「已連線，請選擇一個答案。」
+- 最近公開頁部署檢查：2026-06-21，已包含「一鍵重新計票」Hover 按鈕功能，且講師端與學員端連線 Firebase 實機測試重設成功
 - 投票資料狀態：2026-06-20 已清除 `sessions/default` 與三個 votes 集合；原始 REST 回應均為空集合 `{}`。
-- 最近版面部署檢查：2026-06-21，公開頁回應 200，已包含第 5 頁四階段流程與第 12 頁雙欄結論。
+- 最近版面部署檢查：2026-06-21，公開頁回應 200，已包含第 5 頁四階段流程、第 12 頁雙欄結論與一鍵歸零重設功能。
+
 
 ## 環境變數
 

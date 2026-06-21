@@ -29,7 +29,7 @@
 - [x] 實作投票數邏輯重設功能 (Logical Reset)，包含前端 UI Hover 重新計票按鈕。
 - [x] 部署更新後的 Firestore Rules，限制 resetTimestamp 與 updatedAt。
 - [x] 擴充 verify-presentation.cjs，完成本地邏輯重設的端到端自動化驗證。
-- [ ] 將新版邏輯重設功能推送到 GitHub Pages。
+- [x] 將新版邏輯重設功能推送到 GitHub Pages。
 
 ## 下次優先
 
