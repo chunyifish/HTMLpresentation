@@ -246,7 +246,7 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 
 已完成：
 
-- 在 `firebase/firestore.rules` 放寬對 `sessions/default/polls/{pollId}` 的寫入權限，僅限制包含 `resetTimestamp` 與 `updatedAt` 兩欄位，並將 Rules 重新部署上雲。
+- 在 `firebase/firestore.rules` 放寬對 `sessions/default/polls/{pollId}` 的寫入權限（移除 `hasOnly` 限制以解決真實 Firebase 模式下一鍵歸零報錯 `Missing or insufficient permissions`，僅限制 `sessionId == 'default'` 且 `request.auth != null`），並將 Rules 重新部署上雲。
 - 講師端 `app/index.html`：
   - CSS 加入 Hover 動效按鈕 `.poll-reset-btn`（🔄 重新計票），滑鼠移上投票卡時才淡入顯現。
   - 本地測試模式：一鍵清空該題本地 localStorage，並透過 BroadcastChannel 同步。
