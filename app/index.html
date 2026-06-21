@@ -577,6 +577,7 @@
     }
 
     .live-poll {
+      position: relative;
       background: #fffdf8;
       border: 1px solid var(--line);
       border-left: 12px solid var(--teal);
@@ -596,6 +597,34 @@
       margin: 0;
       font-size: 24px;
       line-height: 1.2;
+    }
+
+    .poll-reset-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid #cbd4dc;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #718096;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .live-poll:hover .poll-reset-btn {
+      opacity: 1;
+    }
+
+    .poll-reset-btn:hover {
+      background: #fffdf8;
+      border-color: var(--teal);
+      color: var(--teal);
     }
 
     .poll-options {
@@ -1319,6 +1348,23 @@
       };
       syncActivePollToSlide();
 
+      pollElements.forEach((pollElement) => {
+        const pollId = pollElement.dataset.pollId;
+        const resetBtn = document.createElement("button");
+        resetBtn.className = "poll-reset-btn";
+        resetBtn.type = "button";
+        resetBtn.textContent = "🔄 重新計票";
+        pollElement.appendChild(resetBtn);
+
+        resetBtn.addEventListener("click", () => {
+          if (confirm("確定要將本地測試的投票數歸零嗎？")) {
+            localStorage.removeItem(`soil-poll-${pollId}`);
+            if (channel) channel.postMessage({ pollId });
+            renderAll();
+          }
+        });
+      });
+
       function readVotes(pollId) {
         try {
           return JSON.parse(localStorage.getItem(`soil-poll-${pollId}`) || "{}");
@@ -1416,10 +1462,88 @@
         const poll = POLLS[pollId];
         const pollRef = firebaseFirestore.doc(db, "sessions", "default", "polls", pollId);
         const voteRef = firebaseFirestore.doc(pollRef, "votes", uid);
+
+        // 動態插入「重新計票」按鈕
+        const resetBtn = document.createElement("button");
+        resetBtn.className = "poll-reset-btn";
+        resetBtn.type = "button";
+        resetBtn.textContent = "🔄 重新計票";
+        pollElement.appendChild(resetBtn);
+
+        let resetTime = 0;
+        let myVoteData = null;
+        let allVotesDocs = [];
         let selectedOptionId = null;
         let latestTotals = {};
 
         setPollStatus(pollElement, "已連線，請選擇一個答案。");
+
+        const getMs = (timestamp) => {
+          if (!timestamp) return 0;
+          return (typeof timestamp.toDate === "function") ? timestamp.toDate().getTime() : 0;
+        };
+
+        const isNewerThan = (timestamp, targetTime) => {
+          if (!timestamp) return true; // Server 尚未回傳的 local 變更，視為有效新票
+          return getMs(timestamp) > targetTime;
+        };
+
+        function filterAndRender() {
+          if (myVoteData) {
+            selectedOptionId = isNewerThan(myVoteData.updatedAt, resetTime) ? myVoteData.optionId : null;
+          } else {
+            selectedOptionId = null;
+          }
+
+          latestTotals = {};
+          allVotesDocs.forEach((vote) => {
+            if (isNewerThan(vote.updatedAt, resetTime)) {
+              latestTotals[vote.optionId] = (latestTotals[vote.optionId] || 0) + 1;
+            }
+          });
+
+          renderPollShell(pollElement, selectedOptionId, latestTotals);
+        }
+
+        // 監聽重設時間戳記
+        firebaseFirestore.onSnapshot(pollRef, (snapshot) => {
+          const data = snapshot.exists() ? snapshot.data() : null;
+          resetTime = data ? getMs(data.resetTimestamp) : 0;
+          filterAndRender();
+        });
+
+        // 監聽自己的票
+        firebaseFirestore.onSnapshot(voteRef, (snapshot) => {
+          myVoteData = snapshot.exists() ? snapshot.data() : null;
+          filterAndRender();
+        });
+
+        // 監聽所有票
+        firebaseFirestore.onSnapshot(firebaseFirestore.collection(pollRef, "votes"), (snapshot) => {
+          allVotesDocs = [];
+          snapshot.forEach((docSnapshot) => {
+            allVotesDocs.push(docSnapshot.data());
+          });
+          filterAndRender();
+        }, (error) => {
+          disablePoll(pollElement, `投票讀取失敗：${error.message}`);
+        });
+
+        // 點擊「重新計票」按鈕
+        resetBtn.addEventListener("click", async () => {
+          if (confirm(`確定要將「${poll.question}」的投票數歸零嗎？`)) {
+            try {
+              setPollStatus(pollElement, "正在重設投票數...");
+              await firebaseFirestore.setDoc(pollRef, {
+                resetTimestamp: firebaseFirestore.serverTimestamp(),
+                updatedAt: firebaseFirestore.serverTimestamp()
+              }, { merge: true });
+              setPollStatus(pollElement, "投票數已歸零。");
+            } catch (error) {
+              setPollStatus(pollElement, `重設失敗：${error.message}`);
+            }
+          }
+        });
 
         pollElement.addEventListener("click", async (event) => {
           const button = event.target.closest(".poll-option");
@@ -1435,22 +1559,6 @@
           } catch (error) {
             setPollStatus(pollElement, `投票送出失敗：${error.message}`);
           }
-        });
-
-        firebaseFirestore.onSnapshot(voteRef, (snapshot) => {
-          selectedOptionId = snapshot.exists() ? snapshot.data().optionId : null;
-          renderPollShell(pollElement, selectedOptionId, latestTotals);
-        });
-
-        firebaseFirestore.onSnapshot(firebaseFirestore.collection(pollRef, "votes"), (snapshot) => {
-          latestTotals = {};
-          snapshot.forEach((docSnapshot) => {
-            const optionId = docSnapshot.data().optionId;
-            latestTotals[optionId] = (latestTotals[optionId] || 0) + 1;
-          });
-          renderPollShell(pollElement, selectedOptionId, latestTotals);
-        }, (error) => {
-          disablePoll(pollElement, `投票讀取失敗：${error.message}`);
         });
       });
     }

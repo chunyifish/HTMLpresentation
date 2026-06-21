@@ -27,7 +27,10 @@ service cloud.firestore {
 
     match /sessions/{sessionId}/polls/{pollId} {
       allow read: if true;
-      allow create, update, delete: if false;
+      allow create, update: if request.auth != null
+        && sessionId == 'default'
+        && request.resource.data.keys().hasOnly(['resetTimestamp', 'updatedAt']);
+      allow delete: if false;
 
       match /votes/{userId} {
         allow read: if true;

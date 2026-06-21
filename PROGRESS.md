@@ -240,4 +240,30 @@ Playwright-based 本地驗證已可執行。專案內不保留損壞的 `node_mo
 
 下一步建議：
 
-- 決定是否提交四份交接文件，並處理未追蹤的 `outputs/presentation-preview-public-sync-debug.png`。
+- 決定是否提交四份交接文件，並處理未追蹤的 `outputs/presentation-preview-public-sync-debug.png`。已完成，上一輪的 4 個文件變更已成功 Commit 並 Push 至遠端，未追蹤的截圖已刪除。
+
+## 2026-06-21 投票數邏輯重設實作與驗證
+
+已完成：
+
+- 在 `firebase/firestore.rules` 放寬對 `sessions/default/polls/{pollId}` 的寫入權限，僅限制包含 `resetTimestamp` 與 `updatedAt` 兩欄位，並將 Rules 重新部署上雲。
+- 講師端 `app/index.html`：
+  - CSS 加入 Hover 動效按鈕 `.poll-reset-btn`（🔄 重新計票），滑鼠移上投票卡時才淡入顯現。
+  - 本地測試模式：一鍵清空該題本地 localStorage，並透過 BroadcastChannel 同步。
+  - Firebase 模式：點擊寫入 `resetTimestamp` 與 `updatedAt` 至雲端，並監聽此時間戳。計票時只計算大於 `resetTimestamp` 的有效票。
+- 學員端 `app/vote.html`：
+  - 訂閱監聽當前題目的 `resetTimestamp`。
+  - 當檢測到重設時，若學員自己原來的投票時間小於重設時間，前端自動將選擇狀態設為空（UI 恢復「未投票」並解鎖按鈕），總票數計票亦同步進行過濾。
+- 驗證工作：
+  - 更新並擴充 `scripts/verify-presentation.cjs` 腳本，加入對「重新計票」按鈕的自動化點擊與歸零過濾、學員端 UI 解鎖等邏輯檢查。
+  - 本地靜態伺服器（8765 Port）端到端自動化驗證順利通過，未見重疊或指令錯誤。
+
+目前狀態：
+
+- 講師一鍵重新計票與學員端自動清空狀態已完成並通過 Playwright 驗證。
+- Firebase rules 已正式更新上雲。
+
+下一步建議：
+
+- 將新版簡報代碼推送到 GitHub Pages。
+- 在正式研習前進行實機的 Firebase 端到端功能驗證。

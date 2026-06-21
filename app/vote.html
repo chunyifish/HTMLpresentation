@@ -226,6 +226,7 @@
     let activePollId = null;
     let selectedOptionId = null;
     let latestTotals = {};
+    let unsubscribePollDoc = null;
     let unsubscribeVote = null;
     let unsubscribeVotes = null;
     let firebaseFirestoreApi = null;
@@ -279,8 +280,10 @@
     }
 
     function clearVoteSubscriptions() {
+      if (unsubscribePollDoc) unsubscribePollDoc();
       if (unsubscribeVote) unsubscribeVote();
       if (unsubscribeVotes) unsubscribeVotes();
+      unsubscribePollDoc = null;
       unsubscribeVote = null;
       unsubscribeVotes = null;
     }
@@ -295,18 +298,54 @@
       const pollRef = firebaseFirestoreApi.doc(db, "sessions", "default", "polls", pollId);
       const voteRef = firebaseFirestoreApi.doc(pollRef, "votes", uid);
 
-      unsubscribeVote = firebaseFirestoreApi.onSnapshot(voteRef, (snapshot) => {
-        selectedOptionId = snapshot.exists() ? snapshot.data().optionId : null;
+      let resetTime = 0;
+      let myVoteData = null;
+      let allVotesDocs = [];
+
+      const getMs = (timestamp) => {
+        if (!timestamp) return 0;
+        return (typeof timestamp.toDate === "function") ? timestamp.toDate().getTime() : 0;
+      };
+
+      const isNewerThan = (timestamp, targetTime) => {
+        if (!timestamp) return true; // Server 尚未回傳的 local 變更，視為有效新票
+        return getMs(timestamp) > targetTime;
+      };
+
+      function filterAndRender() {
+        if (myVoteData) {
+          selectedOptionId = isNewerThan(myVoteData.updatedAt, resetTime) ? myVoteData.optionId : null;
+        } else {
+          selectedOptionId = null;
+        }
+
+        latestTotals = {};
+        allVotesDocs.forEach((vote) => {
+          if (isNewerThan(vote.updatedAt, resetTime)) {
+            latestTotals[vote.optionId] = (latestTotals[vote.optionId] || 0) + 1;
+          }
+        });
+
         renderPoll();
+      }
+
+      unsubscribePollDoc = firebaseFirestoreApi.onSnapshot(pollRef, (snapshot) => {
+        const data = snapshot.exists() ? snapshot.data() : null;
+        resetTime = data ? getMs(data.resetTimestamp) : 0;
+        filterAndRender();
+      });
+
+      unsubscribeVote = firebaseFirestoreApi.onSnapshot(voteRef, (snapshot) => {
+        myVoteData = snapshot.exists() ? snapshot.data() : null;
+        filterAndRender();
       });
 
       unsubscribeVotes = firebaseFirestoreApi.onSnapshot(firebaseFirestoreApi.collection(pollRef, "votes"), (snapshot) => {
-        latestTotals = {};
+        allVotesDocs = [];
         snapshot.forEach((docSnapshot) => {
-          const optionId = docSnapshot.data().optionId;
-          latestTotals[optionId] = (latestTotals[optionId] || 0) + 1;
+          allVotesDocs.push(docSnapshot.data());
         });
-        renderPoll();
+        filterAndRender();
       }, (error) => {
         setStatus(`投票結果讀取失敗：${error.message}`, true);
       });

@@ -78,6 +78,35 @@ async function main() {
     document.querySelector(".slide.active .poll-result")?.textContent.includes("0 票")
   );
   const changedVoteText = await localPage.locator(".slide.active .poll-result").first().innerText();
+
+  // 驗證「重新計票」按鈕在本地測試模式下的效果
+  localPage.once("dialog", (dialog) => dialog.accept());
+  await localPage.locator(".slide.active .poll-reset-btn").click();
+
+  // 等待學員端 UI 解鎖（沒有任何按鈕被選取）
+  await votePage.waitForFunction(() => {
+    return !document.querySelector(".option.selected");
+  });
+
+  const debugFillsText = await localPage.evaluate(() => {
+    const fills = Array.from(document.querySelectorAll(".slide.active .poll-result > span:last-child"));
+    return fills.map(span => span.textContent);
+  });
+  console.log("[Debug] Fills content right after resetBtn click:", debugFillsText);
+
+  // 等待講師端統計歸零（所有選項票數都是 0 票）
+  await localPage.waitForFunction(() => {
+    const fills = Array.from(document.querySelectorAll(".slide.active .poll-result > span:last-child"));
+    return fills.length > 0 && fills.every(span => span.textContent.includes("0 票"));
+  }, null, { timeout: 5000 }).catch(async (e) => {
+    const timeoutText = await localPage.evaluate(() => {
+      const fills = Array.from(document.querySelectorAll(".slide.active .poll-result > span:last-child"));
+      return fills.map(span => span.textContent);
+    });
+    console.log("[Debug] Fills content after 5s timeout:", timeoutText);
+    throw e;
+  });
+
   const localStatus = await localPage.locator(".slide.active [data-poll-status]").innerText();
   const localScreenshotPath = path.resolve(__dirname, "..", "outputs", "presentation-preview-local-poll.png");
   await localPage.screenshot({ path: localScreenshotPath, fullPage: false });
